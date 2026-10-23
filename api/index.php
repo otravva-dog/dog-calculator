@@ -5,6 +5,7 @@ ini_set('display_errors','0');
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: no-referrer');
 function respond(array $value,int $status=200): never {http_response_code($status);echo json_encode($value,JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR);exit;}
 function fail(string $message,int $status=400): never {respond(['error'=>$message],$status);}
 try {
@@ -26,13 +27,19 @@ try {
  $db=new PDO('sqlite:'.$base.'/recipes.sqlite',null,null,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC]);
  $db->exec('PRAGMA busy_timeout=5000');$db->exec('PRAGMA foreign_keys=ON');
  $db->exec('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY,username TEXT NOT NULL UNIQUE,password_hash TEXT NOT NULL,recovery_hash TEXT NOT NULL,session_version INTEGER NOT NULL DEFAULT 1)');
+ // Additive migration preserves existing accounts and recipes.
+ $columns=$db->query('PRAGMA table_info(users)')->fetchAll(PDO::FETCH_COLUMN,1);
+ foreach(['email'=>'TEXT','email_verified_at'=>'TEXT'] as $column=>$type)if(!in_array($column,$columns,true))$db->exec('ALTER TABLE users ADD COLUMN '.$column.' '.$type);
+ $db->exec('CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique ON users(email) WHERE email IS NOT NULL');
+ $db->exec("CREATE TABLE IF NOT EXISTS account_tokens(token_hash TEXT PRIMARY KEY,user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,email TEXT NOT NULL,purpose TEXT NOT NULL,expires INTEGER NOT NULL,session_version INTEGER NOT NULL)");
+ $db->exec('CREATE INDEX IF NOT EXISTS account_tokens_user ON account_tokens(user_id,purpose)');
  $db->exec('CREATE TABLE IF NOT EXISTS recipes(user_id INTEGER NOT NULL REFERENCES users(id),id TEXT NOT NULL,name TEXT NOT NULL,payload TEXT NOT NULL,revision INTEGER NOT NULL,updated_at TEXT NOT NULL,PRIMARY KEY(user_id,id))');
  $db->exec('CREATE TABLE IF NOT EXISTS limits(scope TEXT NOT NULL,who TEXT NOT NULL,attempts INTEGER NOT NULL,expires INTEGER NOT NULL,PRIMARY KEY(scope,who))');
  @chmod($base.'/recipes.sqlite',0600);
  $user=null;
- if(isset($_SESSION['user_id'])){$q=$db->prepare('SELECT id,username,session_version FROM users WHERE id=?');$q->execute([$_SESSION['user_id']]);$user=$q->fetch()?:null;if(!$user||(int)$user['session_version']!==($_SESSION['version']??0)){unset($_SESSION['user_id'],$_SESSION['version']);$user=null;}}
+ if(isset($_SESSION['user_id'])){$q=$db->prepare('SELECT id,username,email,email_verified_at,session_version FROM users WHERE id=?');$q->execute([$_SESSION['user_id']]);$user=$q->fetch()?:null;if(!$user||(int)$user['session_version']!==($_SESSION['version']??0)){unset($_SESSION['user_id'],$_SESSION['version']);$user=null;}}
  $method=$_SERVER['REQUEST_METHOD']??'GET';$route=trim((string)($_GET['path']??''),'/');
- if($method==='GET'&&$route==='session')respond(['authenticated'=>(bool)$user,'email'=>$user['username']??null,'authMode'=>'password','csrf'=>$_SESSION['csrf']]);
+ if($method==='GET'&&$route==='session')respond(['authenticated'=>(bool)$user,'email'=>($user['email']??null)?:($user['username']??null),'emailVerified'=>(bool)($user['email_verified_at']??null),'authMode'=>'password','csrf'=>$_SESSION['csrf']]);
  if(!in_array($method,['GET','POST','PUT','DELETE'],true))fail('Method not allowed',405);
  if($method!=='GET'){
   $origin=$_SERVER['HTTP_ORIGIN']??'';$expected=($https?'https':'http').'://'.$host;
@@ -53,29 +60,7 @@ try {
   if($count>$max){header('Retry-After: '.$seconds);fail('Слишком много попыток. Попробуйте позже.',429);}
  }
  function loginSession(array $user): void {session_regenerate_id(true);$_SESSION['user_id']=(int)$user['id'];$_SESSION['version']=(int)$user['session_version'];$_SESSION['csrf']=bin2hex(random_bytes(24));}
- if($method==='POST'&&in_array($route,['auth/login','auth/register','auth/recover'],true)){
-  $input=body();$name=strtolower(trim((string)($input['username']??'')));$password=(string)($input['password']??'');
-  rate($db,'auth-ip',$_SERVER['REMOTE_ADDR']??'',30,900);rate($db,'auth-user',$name,15,900);
-  if(!preg_match('/^[a-z0-9][a-z0-9_.@-]{2,63}$/D',$name)||strlen($password)<1||strlen($password)>72)fail('Логин: 3–64 латинских символа. Пароль: до 72 байт.');
-  $q=$db->prepare('SELECT * FROM users WHERE username=?');$q->execute([$name]);$existing=$q->fetch();
-  if($route==='auth/register'){
-   rate($db,'register',$_SERVER['REMOTE_ADDR']??'',5,3600);
-   if(strlen($password)<12)fail('Пароль должен содержать не менее 12 символов.');
-   if($existing)fail('Этот логин недоступен.',409);
-   $recovery=bin2hex(random_bytes(20));$hash=password_hash($password,PASSWORD_DEFAULT);
-   try{$q=$db->prepare('INSERT INTO users(username,password_hash,recovery_hash) VALUES(?,?,?)');$q->execute([$name,$hash,hash('sha256',$recovery)]);}catch(PDOException $e){if($e->getCode()==='23000')fail('Этот логин недоступен.',409);throw $e;}
-   $user=['id'=>(int)$db->lastInsertId(),'session_version'=>1];loginSession($user);respond(['authenticated'=>true,'csrf'=>$_SESSION['csrf'],'recoveryCode'=>$recovery,'email'=>$name]);
-  }
-  if($route==='auth/recover'){
-   $recovery=(string)($input['recoveryCode']??'');
-   if(!$existing||strlen($password)<12||!hash_equals($existing['recovery_hash'],hash('sha256',$recovery)))fail('Неверный логин или код восстановления.',401);
-   $newCode=bin2hex(random_bytes(20));$q=$db->prepare('UPDATE users SET password_hash=?,recovery_hash=?,session_version=session_version+1 WHERE id=?');$q->execute([password_hash($password,PASSWORD_DEFAULT),hash('sha256',$newCode),$existing['id']]);$existing['session_version']=(int)$existing['session_version']+1;loginSession($existing);respond(['authenticated'=>true,'csrf'=>$_SESSION['csrf'],'recoveryCode'=>$newCode,'email'=>$name]);
-  }
-  // Execute password verification even for missing users to reduce timing differences.
-  $hash=$existing['password_hash']??'$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi';
-  if(!password_verify($password,$hash)||!$existing)fail('Неверный логин или пароль.',401);
-  loginSession($existing);respond(['authenticated'=>true,'csrf'=>$_SESSION['csrf'],'email'=>$name]);
- }
+ require __DIR__.'/email-auth.php';
  if($route==='auth/logout'&&$method==='POST'){$_SESSION=[];session_regenerate_id(true);respond(['ok'=>true]);}
  if(!$user)fail('Нужен вход.',401);
  $owner=(int)$user['id'];

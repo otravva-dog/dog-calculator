@@ -19,3 +19,7 @@ button.primary{background:#365c4c;border-color:#365c4c;color:#fff}#fit{backgroun
 
 .food-data-note{margin:-3px 0 10px}.food-data-note summary{font-size:12px;color:var(--muted);cursor:pointer}.food-data-note p{font-size:12px;line-height:1.6;color:var(--muted);margin:8px 0}
 .ingredient{min-height:76px}.recipe-load .product-icons svg{width:26px;height:26px}
+
+#authHint{font-size:13px;line-height:1.6}#authMessage{overflow-wrap:anywhere}#authTabs[hidden]{display:none}.account{flex-wrap:wrap}#manageEmail{white-space:normal}
+
+.account-message{font-size:14px;line-height:1.6;margin:0;padding:12px 16px;border:1px solid var(--line);border-radius:4px;background:#fff}
