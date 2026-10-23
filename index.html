@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор банки</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="grid-container">
+        <header class="grid-header"><h1>Конструктор банки</h1></header>
+        
+        <!-- ЦЕЛЕВЫЕ ПОКАЗАТЕЛИ -->
+        <section class="card grid-targets">
+            <div class="section-header">
+                <h2>Целевые показатели</h2>
+                <button id="save-targets" class="btn-save" title="Сохранить">💾</button>
+            </div>
+            <div class="targets-row">
+                <div class="target-item">
+                    <label>Калории</label>
+                    <div class="range-inline">
+                        <input type="number" id="target-kcal-min" placeholder="270">
+                        <span class="sep">—</span>
+                        <input type="number" id="target-kcal-max" placeholder="285">
+                        <span class="unit-mini">ккал</span>
+                    </div>
+                </div>
+                <div class="target-item">
+                    <label>Белок</label>
+                    <div class="range-inline">
+                        <input type="number" id="target-protein-min" placeholder="20" step="1">
+                        <span class="sep">—</span>
+                        <input type="number" id="target-protein-max" placeholder="25" step="1">
+                        <span class="unit-mini">г</span>
+                    </div>
+                </div>
+                <div class="target-item">
+                    <label>Жир</label>
+                    <div class="range-inline">
+                        <input type="number" id="target-fat-min" placeholder="8" step="1">
+                        <span class="sep">—</span>
+                        <input type="number" id="target-fat-max" placeholder="12" step="1">
+                        <span class="unit-mini">г</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+<!-- БАЗА РАЦИОНА -->
+<section class="card grid-ingredients">
+    <!-- Таблица ингредиентов -->
+    <div class="ingredients-table-wrapper">
+        <h2>База рациона</h2>
+        
+        <div class="ingredient-header">
+            <div class="col-select">Продукт</div>
+            <div class="col-kbju">Б</div>
+            <div class="col-kbju">Ж</div>
+            <div class="col-kbju">У</div>
+            <div class="col-kbju">Ккал</div>
+            <div class="col-reset"></div>
+        </div>
+
+        <div class="ingredient-block">
+            <div class="ingredient-line">
+                <select id="select-protein" class="select-product"><option value="">Белок...</option></select>
+                <input type="number" id="protein-p" class="kbju-input" step="0.1" placeholder="Б">
+                <input type="number" id="protein-f" class="kbju-input" step="0.1" placeholder="Ж">
+                <input type="number" id="protein-c" class="kbju-input" step="0.1" placeholder="У">
+                <input type="number" id="protein-kcal" class="kbju-input" readonly placeholder="Ккал">
+                <button class="btn-reset" data-target="protein" title="Сбросить">↺</button>
+            </div>
+        </div>
+
+        <div class="ingredient-block">
+            <div class="ingredient-line">
+                <select id="select-protein2" class="select-product"><option value="">+ Второй белок (опц.)...</option></select>
+                <input type="number" id="protein2-p" class="kbju-input" step="0.1" placeholder="Б" disabled>
+                <input type="number" id="protein2-f" class="kbju-input" step="0.1" placeholder="Ж" disabled>
+                <input type="number" id="protein2-c" class="kbju-input" step="0.1" placeholder="У" disabled>
+                <input type="number" id="protein2-kcal" class="kbju-input" readonly placeholder="Ккал" disabled>
+                <button class="btn-reset" data-target="protein2" title="Сбросить">↺</button>
+            </div>
+        </div>
+
+        <div class="ingredient-block">
+            <div class="ingredient-line">
+                <select id="select-veg1" class="select-product"><option value="">Главный овощ...</option></select>
+                <input type="number" id="veg1-p" class="kbju-input" step="0.1" placeholder="Б">
+                <input type="number" id="veg1-f" class="kbju-input" step="0.1" placeholder="Ж">
+                <input type="number" id="veg1-c" class="kbju-input" step="0.1" placeholder="У">
+                <input type="number" id="veg1-kcal" class="kbju-input" readonly placeholder="Ккал">
+                <button class="btn-reset" data-target="veg1" title="Сбросить">↺</button>
+            </div>
+        </div>
+
+        <div class="ingredient-block">
+            <div class="ingredient-line">
+                <select id="select-veg2" class="select-product"><option value="">Доп. овощ...</option></select>
+                <input type="number" id="veg2-p" class="kbju-input" step="0.1" placeholder="Б">
+                <input type="number" id="veg2-f" class="kbju-input" step="0.1" placeholder="Ж">
+                <input type="number" id="veg2-c" class="kbju-input" step="0.1" placeholder="У">
+                <input type="number" id="veg2-kcal" class="kbju-input" readonly placeholder="Ккал">
+                <button class="btn-reset" data-target="veg2" title="Сбросить">↺</button>
+            </div>
+        </div>
+
+        <div class="ingredient-block">
+            <div class="ingredient-line">
+                <select id="select-veg3" class="select-product"><option value="">Доп. овощ...</option></select>
+                <input type="number" id="veg3-p" class="kbju-input" step="0.1" placeholder="Б">
+                <input type="number" id="veg3-f" class="kbju-input" step="0.1" placeholder="Ж">
+                <input type="number" id="veg3-c" class="kbju-input" step="0.1" placeholder="У">
+                <input type="number" id="veg3-kcal" class="kbju-input" readonly placeholder="Ккал">
+                <button class="btn-reset" data-target="veg3" title="Сбросить">↺</button>
+            </div>
+        </div>
+
+        <!-- Кнопка Рассчитать внутри таблицы -->
+        <button id="calculate-btn" class="btn-calculate">Рассчитать</button>
+    </div>
+
+    <!-- Колонка с рецептами -->
+    <aside class="recipes-column">
+        <h3 class="recipes-column-title">Мои рецепты</h3>
+        <div class="recipes-scroll">
+            <div id="recipes-list" class="recipes-grid"></div>
+        </div>
+    </aside>
+</section>
+
+        <!-- ИТОГОВАЯ РЕЦЕПТУРА -->
+        <section class="card grid-result" id="result-section" style="display: none;">
+            <div class="section-header">
+                <h2>Итоговая рецептура</h2>
+                <div style="display: flex; gap: 8px;">
+                    <button id="update-recipe-btn" class="btn-update" title="Обновить текущий рецепт" style="display: none;">🔄 Обновить</button>
+                    <button id="save-recipe-btn" class="btn-save" title="Сохранить рецепт">💾</button>
+                </div>
+            </div>
+            <div id="algorithm-choice" class="algorithm-choice"></div>
+            <div id="meat-warning" class="meat-warning" style="display: none;"></div>
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>Ингредиент</th>
+                        <th>Вес</th>
+                        <th>Ккал</th>
+                        <th>Б</th>
+                        <th>Ж</th>
+                        <th>У</th>
+                    </tr>
+                </thead>
+                <tbody id="result-table-body"></tbody>
+            </table>
+        </section>
+
+        <!-- ПОПАДАНИЕ В ЦЕЛЬ -->
+        <section class="card grid-target-match" id="target-match-section" style="display: none;">
+            <h2>Попадание в цель</h2>
+            <div id="progress-bars" class="progress-bars-row"></div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
