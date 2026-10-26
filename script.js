@@ -182,7 +182,8 @@ function group(id,row,mode,time,note){if(!groups.has(id))groups.set(id,{names:[]
 for(const r of active){const k=r.key;
 if(k==='oil'){group('serving',r,'Перед подачей','Без нагрева','Добавить к готовой порции.');continue;}
 if(['cranberry_fresh','cranberry_frozen'].includes(k)){group('pumpkinberries',r,'85 °C','Около 60 мин',hasPumpkin?'Тыкву и вымытую бруснику можно готовить в одном пакете до мягкости. Сок — в корм.':'Вымыть, готовить до размягчения. Сок — в корм.');continue;}
-if(k==='apple'||k==='pear'){group('fresh-fruit',r,'Перед подачей','Свежими','Вымыть, удалить сердцевину с семенами, нарезать небольшими кусочками.');continue;}
+if(k==='apple'||k==='pear'){group('cooked-fruit',r,'85 °C','Ориентировочно 45–60 мин','Вымыть, удалить сердцевину с семенами, нарезать небольшими кусочками. Готовить до мягкости; сок — в корм.');continue;}
+if(k==='raspberry_fresh'||k==='raspberry_frozen'){group('cooked-raspberry',r,'85 °C','Ориентировочно 30–60 мин','Свежую промыть, замороженную разморозить в холодильнике. Сок — в корм. Можно готовить с тыквой около 60 мин; ягоды разварятся.');continue;}
 if(k==='strawberry'){group('strawberry',r,'Перед подачей','Свежей','Вымыть, убрать зелёные чашелистики, нарезать.');continue;}
 if(fruitKeys.includes(k)){group('fresh-berries',r,'Перед подачей','Свежими','Вымыть; крупные ягоды разрезать. Добавить в готовую порцию.');continue;}
 if(k==='wakame'){group('wakame',r,'Отдельная проверка','Йод','Уточнить сухой/размоченный вес и дозу.');continue;}
