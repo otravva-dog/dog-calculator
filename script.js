@@ -177,13 +177,16 @@ const remaining=model.daily-t.kcal;let budget=remaining>=0?`После теку�
 return model.portion;}
 function applyProfile(){const profile={...(state.profile||{})};if(profile.activity==='1')profile.activity='110';if(profile.activity==='0.85')profile.activity='95';if(profile.activity==='1.25')profile.activity='125';if(profile.neutered==='1.8')profile.neutered='intact';if(profile.neutered==='1.6')profile.neutered='neutered';if(profile.breed&&![...$('breed').options].some(o=>o.value===profile.breed))$('breed').append(new Option(String(profile.breed).slice(0,100),String(profile.breed).slice(0,100)));profileIds.forEach(k=>{$(k).value=profile[k]??PROFILE_DEFAULTS[k];if($(k).tagName==='SELECT'&&!$(k).value)$(k).value=PROFILE_DEFAULTS[k];});$('batch').value=state.batch;}
 profileIds.forEach(id=>{$(id).oninput=()=>{state.profile=Object.fromEntries(profileIds.map(k=>[k,$(k).value]));estimate();persist();};});$('applyEstimate').onclick=()=>{const kcal=estimate();if(kcal===null)return;const proposed=scaledTargets(kcal);if(proposed.kcal[1]>10000){notice('Цели превышают предел калькулятора 10 000 ккал. Проверьте профиль.');return;}state.targets=proposed;renderTargets();update();notice('Цели порции пересчитаны из профиля; пропорции белка и жира сохранены.');};
-function cookingPlan(recipeState=state){const active=recipeState.rows.filter(r=>r.g>0),groups=new Map;
+function cookingPlan(recipeState=state){const active=recipeState.rows.filter(r=>r.g>0),groups=new Map,hasPumpkin=active.some(r=>r.key==='pumpkin'),hasLingonberry=active.some(r=>['cranberry_fresh','cranberry_frozen'].includes(r.key));
 function group(id,row,mode,time,note){if(!groups.has(id))groups.set(id,{names:[],mode,time,note});const g=groups.get(id);if(!g.names.includes(catalog[row.key].name))g.names.push(catalog[row.key].name);}
 for(const r of active){const k=r.key;
 if(k==='oil'){group('serving',r,'Перед подачей','Без нагрева','Добавить к готовой порции.');continue;}
-if(fruitKeys.includes(k)){group('fresh',r,'Перед подачей','Свежими','Вымыть; убрать семена/косточки, измельчить.');continue;}
+if(['cranberry_fresh','cranberry_frozen'].includes(k)){group('pumpkinberries',r,'85 °C','Около 60 мин',hasPumpkin?'Тыкву и вымытую бруснику можно готовить в одном пакете до мягкости. Сок — в корм.':'Вымыть, готовить до размягчения. Сок — в корм.');continue;}
+if(k==='apple'||k==='pear'){group('fresh-fruit',r,'Перед подачей','Свежими','Вымыть, удалить сердцевину с семенами, нарезать небольшими кусочками.');continue;}
+if(k==='strawberry'){group('strawberry',r,'Перед подачей','Свежей','Вымыть, убрать зелёные чашелистики, нарезать.');continue;}
+if(fruitKeys.includes(k)){group('fresh-berries',r,'Перед подачей','Свежими','Вымыть; крупные ягоды разрезать. Добавить в готовую порцию.');continue;}
 if(k==='wakame'){group('wakame',r,'Отдельная проверка','Йод','Уточнить сухой/размоченный вес и дозу.');continue;}
-if(k==='beef_shank'){group('shank',r,'80 °C','16 ч','Для мягкости; отдельный пакет. Длительная выдержка одинакова для слоя 2–3 см.');continue;}
+if(k==='beef_shank'){group('shank',r,'85 °C','Ориентировочно 6–8 ч','Без кости, кусочки 1,5–2 см поперёк волокон; пакет слоем 2–3 см. После 6 ч проверить: мясо легко режется вилкой, соединительная ткань мягкая. Если жёстко — ещё 1–2 ч. Сок — в корм.');continue;}
 if(k==='beef_shoulder'){group('shoulder',r,'80 °C','12 ч','Для мягкой тушёной текстуры; отдельный пакет.');continue;}
 if(['salmon_murmansk','salmon_generic','sockeye','trout'].includes(k)){group('fatfish',r,'55 °C','2 см: 4 ч 45 мин · 3 см: 5 ч 15 мин','Альтернатива 58 °C: 2 см — 2 ч, 3 см — 2 ч 30 мин. Пастеризация жирной рыбы, включая прогрев; Baldwin 3.1.');continue;}
 if(['cod','hake','pollock','sea_bass'].includes(k)){group('leanfish',r,'55 °C','2 см: 3 ч · 3 см: 3 ч 45 мин','Альтернатива 58 °C: 2 см — 1 ч 30 мин, 3 см — 2 ч. Табличный ориентир для нежирной рыбы, включая прогрев; Baldwin 3.1.');continue;}
@@ -195,10 +198,11 @@ if(k==='pork_lean'){group('pork',r,'65 °C','2 ч','Вырезка; ваш ре�
 if(k==='beef_tenderloin'){group('beef-tenderloin',r,'62 °C','2 ч','Кулинарный режим ростбифа из вашей таблицы; для 2–3 см превышает минимум Baldwin 5.1.');continue;}
 if(k==='rabbit'){group('rabbit',r,'75 °C','90 мин','Ориентир для кусочков, слой 2–3 см. Контроль центра ≥74 °C; не валидация процесса.');continue;}
 if(proteinKeys.includes(k)){group('other-meat',r,'65 °C','2 см: 60 мин · 3 см: 75 мин','Нежирное мясо без костей; с учётом прогрева по Baldwin 5.1.');continue;}
-if(['pumpkin','sweet_potato','carrot'].includes(k)){group('denseplants',r,'85 °C','60–90 мин','Мелкие кусочки до полной мягкости; отдельно от нежных овощей. Время зависит от сорта и нарезки.');continue;}
+if(k==='pumpkin'){group('pumpkinberries',r,'85 °C','Около 60 мин',hasLingonberry?'Тыкву и вымытую бруснику можно готовить в одном пакете до мягкости. Сок — в корм.':'Небольшие кусочки до мягкости; сок — в корм.');continue;}
+if(k==='sweet_potato'||k==='carrot'){group('denseplants',r,'85 °C','60–90 мин','Небольшие кусочки до полной готовности и мягкости. Можно подавать кусочками; разминать по желанию.');continue;}
 if(k==='green_beans'){group('beans',r,'85 °C','60 мин','До полной готовности и мягкости; ориентир по текстуре.');continue;}
 if(k.startsWith('cauliflower')){group('cauliflower',r,'85 °C','45–60 мин','До мягкости. 65 °C / 1 ч из вашей таблицы — плотная салатная текстура.');continue;}
-group('greenplants',r,'72 °C','60 мин','Ваш режим овощного микса без лука. Если овощи ещё плотные — 85 °C до мягкости; фасоль только полностью приготовленной.');
+group('greenplants',r,'85 °C','30–60 мин','Небольшие кусочки до мягкости. Нежные овощи можно вынуть раньше корнеплодов; разминать по желанию.');
 }
 return [...groups.values()].map(g=>({...g,title:g.names.join(' + ')}));}
 function renderCooking(){$('cookPlan').replaceChildren();const plan=cookingPlan();$('thicknessNote').textContent='Слой 2–3 см · для промежуточной толщины берите время 3 см · продукты ≤5 °C.';if(!plan.length){$('cookPlan').append(el('p','Добавьте продукты.','muted'));return;}for(const g of plan){const card=el('article',undefined,'cook-card');card.append(el('h3',g.title),el('strong',g.mode),el('div',g.time,'cook-time'),el('p',g.note));$('cookPlan').append(card);}}
