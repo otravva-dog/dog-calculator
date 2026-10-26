@@ -23,3 +23,5 @@ button.primary{background:#365c4c;border-color:#365c4c;color:#fff}#fit{backgroun
 #authHint{font-size:13px;line-height:1.6}#authMessage{overflow-wrap:anywhere}#authTabs[hidden]{display:none}.account{flex-wrap:wrap}#manageEmail{white-space:normal}
 
 .account-message{font-size:14px;line-height:1.6;margin:0;padding:12px 16px;border:1px solid var(--line);border-radius:4px;background:#fff}
+
+.target-hint{font-size:12px;color:var(--muted);line-height:1.5;margin:10px 0 0}.cook-time{font-size:14px;line-height:1.5;font-weight:600;margin-top:5px}
