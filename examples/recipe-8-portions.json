@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "state": {
+    "targets": {
+      "kcal": [
+        310,
+        330
+      ],
+      "p": [
+        25,
+        38
+      ],
+      "f": [
+        10,
+        25
+      ],
+      "c": [
+        null,
+        null
+      ]
+    },
+    "rows": [
+      {
+        "key": "turkey_thigh",
+        "g": 115,
+        "locked": false
+      },
+      {
+        "key": "pumpkin",
+        "g": 105,
+        "locked": false
+      },
+      {
+        "key": "pepper_ramiro",
+        "g": 40,
+        "locked": false
+      },
+      {
+        "key": "apple",
+        "g": 40,
+        "locked": false
+      },
+      {
+        "key": "oil",
+        "g": 13,
+        "locked": false
+      }
+    ],
+    "batch": 8,
+    "profile": {},
+    "thickness": 30,
+    "targetSchema": 5,
+    "autoName": true
+  },
+  "recipes": []
+}
