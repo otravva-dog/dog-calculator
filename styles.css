@@ -36,3 +36,4 @@ button.primary{background:#365c4c;border-color:#365c4c;color:#fff}#fit{backgroun
 @media print{
 #printRecipe .print-title-row{display:flex;justify-content:space-between;align-items:baseline;gap:24px;margin-bottom:12px}#printRecipe .print-title-row h1{margin:0}#printRecipe .print-batch{font-size:14px;white-space:nowrap}#printRecipe .print-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:9px 0;border-bottom:1px solid #ddd;font-size:12px;line-height:1.45}#printRecipe .print-item>span{overflow-wrap:anywhere}#printRecipe .print-item>strong{font-weight:600;white-space:nowrap}
 }
+@media print{#printRecipe .print-cooking{grid-template-columns:repeat(var(--cook-columns,5),minmax(0,1fr));gap:8px}#printRecipe .print-cooking .cook-card{padding:9px 8px}#printRecipe .print-cooking h3{overflow-wrap:anywhere}#printRecipe .print-cooking .cook-time{font-size:12px;line-height:1.5}}
