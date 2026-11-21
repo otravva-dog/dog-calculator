@@ -17,9 +17,10 @@ function mailSettings(): array {
 function sendAccountLink(string $email,string $purpose,string $token): bool {
  [$url,$from]=mailSettings();$reset=$purpose==='reset';$subject=$reset?'Восстановление пароля':'Подтверждение email';
  $link=$url.'/#'.($reset?'reset':'verify').'='.$token;
- $text="Конструктор питания\n\n".($reset?'Чтобы задать новый пароль, откройте ссылку:':'Подтвердите почту для восстановления доступа:')."\n".$link."\n\nСсылка действует ".($reset?'30 минут':'24 часа')." и используется один раз.\nЕсли вы не запрашивали это письмо, ничего делать не нужно.\n";
- $headers=['From'=>$from,'MIME-Version'=>'1.0','Content-Type'=>'text/plain; charset=UTF-8','Content-Transfer-Encoding'=>'8bit'];
- $accepted=@mail($email,'=?UTF-8?B?'.base64_encode($subject.' · Конструктор питания').'?=',$text,$headers);
+ require_once __DIR__.'/mail-template.php';[$text,$html]=accountMailContent($link,$reset);$boundary='nutrition_'.bin2hex(random_bytes(16));
+ $message='--'.$boundary."\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n".quoted_printable_encode($text)."\r\n--".$boundary."\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n".quoted_printable_encode($html)."\r\n--".$boundary."--\r\n";
+ $headers=['From'=>$from,'MIME-Version'=>'1.0','Content-Type'=>'multipart/alternative; boundary="'.$boundary.'"'];
+ $accepted=@mail($email,'=?UTF-8?B?'.base64_encode($subject.' · Гавстрономия').'?=',$message,$headers);
  if(!$accepted)error_log('Nutrition mail: delivery transport rejected account email');return $accepted;
 }
 function issueEmailToken(PDO $db,int $userId,string $email,string $purpose,int $version): string {

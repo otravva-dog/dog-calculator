@@ -34,12 +34,13 @@ try {
  $db->exec("CREATE TABLE IF NOT EXISTS account_tokens(token_hash TEXT PRIMARY KEY,user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,email TEXT NOT NULL,purpose TEXT NOT NULL,expires INTEGER NOT NULL,session_version INTEGER NOT NULL)");
  $db->exec('CREATE INDEX IF NOT EXISTS account_tokens_user ON account_tokens(user_id,purpose)');
  $db->exec('CREATE TABLE IF NOT EXISTS recipes(user_id INTEGER NOT NULL REFERENCES users(id),id TEXT NOT NULL,name TEXT NOT NULL,payload TEXT NOT NULL,revision INTEGER NOT NULL,updated_at TEXT NOT NULL,PRIMARY KEY(user_id,id))');
+ $db->exec('CREATE TABLE IF NOT EXISTS preferences(user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,payload TEXT NOT NULL,revision INTEGER NOT NULL,updated_at TEXT NOT NULL)');
  $db->exec('CREATE TABLE IF NOT EXISTS limits(scope TEXT NOT NULL,who TEXT NOT NULL,attempts INTEGER NOT NULL,expires INTEGER NOT NULL,PRIMARY KEY(scope,who))');
  @chmod($base.'/recipes.sqlite',0600);
  $user=null;
  if(isset($_SESSION['user_id'])){$q=$db->prepare('SELECT id,username,email,email_verified_at,session_version FROM users WHERE id=?');$q->execute([$_SESSION['user_id']]);$user=$q->fetch()?:null;if(!$user||(int)$user['session_version']!==($_SESSION['version']??0)){unset($_SESSION['user_id'],$_SESSION['version']);$user=null;}}
  $method=$_SERVER['REQUEST_METHOD']??'GET';$route=trim((string)($_GET['path']??''),'/');
- if($method==='GET'&&$route==='session')respond(['authenticated'=>(bool)$user,'username'=>$user['username']??null,'email'=>$user['email']??null,'emailVerified'=>(bool)($user['email_verified_at']??null),'authMode'=>'password','csrf'=>$_SESSION['csrf']]);
+ if($method==='GET'&&$route==='session')respond(['authenticated'=>(bool)$user,'userId'=>$user['id']??null,'username'=>$user['username']??null,'email'=>$user['email']??null,'emailVerified'=>(bool)($user['email_verified_at']??null),'authMode'=>'password','csrf'=>$_SESSION['csrf']]);
  if(!in_array($method,['GET','POST','PUT','DELETE'],true))fail('Method not allowed',405);
  if($method!=='GET'){
   $origin=$_SERVER['HTTP_ORIGIN']??'';$expected=($https?'https':'http').'://'.$host;
@@ -64,6 +65,7 @@ try {
  if($route==='auth/logout'&&$method==='POST'){$_SESSION=[];session_regenerate_id(true);respond(['ok'=>true]);}
  if(!$user)fail('Нужен вход.',401);
  $owner=(int)$user['id'];
+ require __DIR__.'/preferences.php';
  if($route==='recipes'&&$method==='GET'){$q=$db->prepare('SELECT id,name,payload,revision,updated_at FROM recipes WHERE user_id=? ORDER BY updated_at DESC LIMIT 500');$q->execute([$owner]);$out=[];foreach($q as $r)$out[]=['id'=>$r['id'],'name'=>$r['name'],'state'=>json_decode($r['payload'],true,40,JSON_THROW_ON_ERROR),'revision'=>(string)$r['revision'],'updatedAt'=>$r['updated_at']];respond(['recipes'=>$out]);}
  if(!preg_match('#^recipes/([A-Za-z0-9_-]{1,100})$#D',$route,$match))fail('Not found',404);
  $id=$match[1];
