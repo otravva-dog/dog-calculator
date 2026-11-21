@@ -90,6 +90,12 @@ const FOOD_REFERENCE={
 for(const [key,values]of Object.entries(FOOD_REFERENCE))Object.assign(catalog[key],values);
 for(const key of ['duck_breast','duck_thigh','hake','cranberry_fresh','cranberry_frozen','wakame','turkey_indilight_thigh','turkey_indilight_breast','turkey_indilight_tenderloin'])catalog[key].sourceNote='Исходные значения: точная этикетка не подтверждена. Уточните КБЖУ на упаковке.';
 catalog.wakame.name='Вакаме (сухие)';catalog.wakame.sourceNote+=' Сухие и размоченные водоросли не взаимозаменяемы.';catalog.beef_shoulder.name='Говядина (лопатка без наружного жира)';catalog.beef_shank.name='Говядина (голяшка без кости и жира)';catalog.lamb_lean.name='Баранина (нежирная)';catalog.salmon_generic.name='Лосось атлантический (выращенный)';catalog.sea_bass.name='Морской окунь (атлантический)';
+const SHORT_PRODUCT_NAMES={
+ turkey_breast:'Грудка индейки',turkey_indilight_breast:'Грудка индейки',turkey_thigh:'Бедро индейки',turkey_indilight_thigh:'Бедро индейки',turkey_tenderloin:'Филе индейки',turkey_indilight_tenderloin:'Филе индейки',
+ duck_breast:'Грудка утки',duck_thigh:'Бедро утки',chicken_breast:'Куриная грудка',beef_tenderloin:'Говяжья вырезка',beef_shoulder:'Говяжья лопатка',beef_shank:'Говяжья голяшка',pork_lean:'Свинина',
+ salmon_murmansk:'Сёмга',salmon_generic:'Лосось',cauliflower_fresh:'Цветная капуста',cauliflower_frozen:'Цветная капуста',pear:'Груша'
+};
+function shortProductName(key){return SHORT_PRODUCT_NAMES[key]||catalog[key].name.replace(/\s*\([^)]*\)/gu,'').replace(/\s+/gu,' ').trim();}
 function snapshotRecipe(record){if(record.state.foodSchema!==6){record.state.rows.forEach(row=>{if(!row.data)row.data=Object.fromEntries(['kcal','p','f','c'].map(k=>[k,LEGACY_CATALOG[row.key][k]]));});record.state.foodSchema=6;}return record;}
 const PRODUCT_GROUPS=[
  ['Индейка',proteinKeys.filter(k=>k.startsWith('turkey'))],['Утка',proteinKeys.filter(k=>k.startsWith('duck'))],['Курица',['chicken_breast']],['Мясо',['beef_tenderloin','beef_shoulder','beef_shank','rabbit','lamb_lean','pork_lean']],['Лососёвые',['salmon_murmansk','salmon_generic','sockeye','trout']],['Белая рыба',['cod','hake','pollock','sea_bass']],
@@ -206,8 +212,56 @@ if(k.startsWith('cauliflower')){group('cauliflower',r,'85 °C','45–60 мин',
 group('greenplants',r,'85 °C','30–60 мин','Небольшие кусочки до мягкости. Нежные овощи можно вынуть раньше корнеплодов; разминать по желанию.');
 }
 return [...groups.values()].map(g=>({...g,title:g.names.join(' + ')}));}
-function renderCooking(){$('cookPlan').replaceChildren();const plan=cookingPlan();$('thicknessNote').textContent='Слой 2–3 см · для промежуточной толщины берите время 3 см · продукты ≤5 °C.';if(!plan.length){$('cookPlan').append(el('p','Добавьте продукты.','muted'));return;}for(const g of plan){const card=el('article',undefined,'cook-card');card.append(el('h3',g.title),el('strong',g.mode),el('div',g.time,'cook-time'),el('p',g.note));$('cookPlan').append(card);}}
-function ingredientGroups(recipeState){const groups=[{title:'Белок',kind:'protein',rows:[]},{title:'Овощи',kind:'plants',rows:[]},{title:'Другое',kind:'extras',rows:[]}];recipeState.rows.filter(r=>r.g>0).forEach(r=>groups[proteinKeys.includes(r.key)?0:r.key==='oil'||r.key==='wakame'?2:1].rows.push(r));return groups;}
+function ingredientGroups(recipeState){
+ const grouped=new Map;
+ for(const row of recipeState.rows.filter(r=>r.g>0))grouped.set(row.key,(grouped.get(row.key)||0)+row.g);
+ const groups=[{title:'Белок',kind:'protein',rows:[]},{title:'Овощи и фрукты',kind:'plants',rows:[]},{title:'Добавки',kind:'extras',rows:[]}];
+ for(const [key,g]of grouped)groups[proteinKeys.includes(key)?0:key==='oil'||key==='wakame'?2:1].rows.push({key,g});
+ return groups;
+}
+function preparationBatch(recipeState){const count=recipeState.batch,word={one:'порция',few:'порции',many:'порций',other:'порции'}[new Intl.PluralRules('ru').select(count)];return count===1?'1 порция':`${count} ${word} / 1 порция`;}
+function preparationCards(recipeState){
+ const root=el('div',undefined,'prep-layout'),groups=ingredientGroups(recipeState),plan=cookingPlan(recipeState),singleProtein=groups[0].rows.length===1;
+ const makeGroup=group=>{
+  const side=singleProtein&&group.kind==='extras',section=el('section',undefined,`prep-group prep-${group.kind}${group.kind==='protein'&&singleProtein?' prep-single':''}${side?' prep-side':''}`),grid=el('div',undefined,'prep-grid');
+  section.append(el('h3',group.title,'prep-group-title'));grid.dataset.count=group.rows.length;
+  for(const row of group.rows){
+   const name=shortProductName(row.key),mode=plan.find(g=>g.names.includes(catalog[row.key].name)),card=el('article',undefined,'prep-item'+(group.kind==='protein'&&singleProtein?' prep-item-wide':''));card.dataset.key=row.key;
+   const batch=round1(row.g*recipeState.batch).toLocaleString('ru-RU'),portion=round1(row.g).toLocaleString('ru-RU'),weight=el('div',undefined,'prep-weight');
+   if((batch+portion).length>12)weight.classList.add('prep-weight-long');
+   weight.setAttribute('aria-label',recipeState.batch===1?`${portion} г на порцию`:`${batch} г на партию, ${portion} г на порцию`);
+   weight.append(el('span',batch,'prep-batch-weight'));
+   if(recipeState.batch>1)weight.append(el('span','/','prep-slash'),el('span',portion,'prep-portion-weight'));
+   weight.append(el('span','г','prep-unit'));
+   const body=el('div',undefined,'prep-body'),cooking=el('div',undefined,'prep-mode');
+   if(mode){
+    if(mode.mode==='Перед подачей')cooking.append(el('span','Перед подачей'));
+    else if(row.key==='wakame')cooking.append(el('span','Проверить дозу йода'));
+    else cooking.append(el('span',mode.mode,'prep-temperature'),el('span','·','prep-dot'),el('span',printCookingTime(mode.time),'prep-time'));
+   }
+   card.append(el('h4',name,'prep-name'));body.append(weight,cooking);card.append(body);
+   if(mode?.note){const detail=el('details',undefined,'prep-detail');detail.append(el('summary','Подробнее'));if(mode.time!==printCookingTime(mode.time))detail.append(el('p',mode.time));detail.append(el('p',mode.note));card.append(detail);}
+   grid.append(card);
+  }
+  section.append(grid);return section;
+ };
+ const ordered=singleProtein?[groups[0],groups[2],groups[1]]:groups;
+ for(const group of ordered)if(group.rows.length)root.append(makeGroup(group));
+ return root;
+}
+function equalizePreparationCards(root){
+ const cards=[...root.querySelectorAll('.prep-item')];root.style.removeProperty('--prep-card-height');
+ if(!cards.length||getComputedStyle(root).display==='none')return;
+ const height=Math.ceil(Math.max(...cards.map(card=>card.getBoundingClientRect().height)));
+ root.style.setProperty('--prep-card-height',height+'px');
+}
+function renderCooking(){
+ $('preparationBatch').textContent=preparationBatch(state);$('cookPlan').replaceChildren();
+ $('thicknessNote').textContent='Слой 2–3 см · время для кусочков и слоя до 3 см · продукты ≤5 °C.';
+ if(!state.rows.some(r=>r.g>0)){$('cookPlan').append(el('p','Добавьте продукты.','muted'));return;}
+ $('cookPlan').append(preparationCards(state));equalizePreparationCards($('cookPlan'));
+}
+
 function localDateValue(date=new Date()){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
 function validPreparationDate(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const [y,m,d]=value.split('-').map(Number),date=new Date(0);date.setFullYear(y,m-1,d);date.setHours(12,0,0,0);return y>=1900&&y<=9999&&date.getFullYear()===y&&date.getMonth()===m-1&&date.getDate()===d;}
 function displayPreparationDate(value){return value.split('-').reverse().join('.');}
@@ -216,9 +270,17 @@ function formatRussianDateInput(input){const start=input.selectionStart??input.v
 
 function preparedDate(){const value=parsePreparationDate($('preparedDate').value);if(!value){notice('Введите дату приготовления: ДД.ММ.ГГГГ.');return null;}return value;}
 function printCookingTime(time){time=time.replace(/^(Около|Ориентировочно)\s+/i,'');if(time.startsWith('Кусочки:'))return time.split('·')[0].replace('Кусочки:','').trim();if(time.includes('3 см:'))return time.split('3 см:')[1].trim();return time;}
-function cookingCards(recipeState){const grid=el('div',undefined,'cook-plan print-cooking'),plan=cookingPlan(recipeState);grid.style.setProperty('--cook-columns',String(Math.max(1,Math.min(6,plan.length))));for(const g of plan){const card=el('article',undefined,'cook-card');card.append(el('h3',g.title),el('strong',g.mode==='Перед подачей'?g.time:g.mode),el('div',g.mode==='Перед подачей'?'Перед подачей':printCookingTime(g.time),'cook-time'));grid.append(card);}return grid;}
-function printRecipe(saved=null){const recipeState=saved?.state||state,date=preparedDate();if(!date)return;if(!recipeState.rows.some(r=>r.g>0)){notice('Добавьте продукты для печати.');return;}const name=cleanName(saved?.name||$('recipeName').value)||'Рецепт',root=$('printRecipe'),title=el('div',undefined,'print-title-row'),word={one:'порция',few:'порции',many:'порций',other:'порции'}[new Intl.PluralRules('ru').select(recipeState.batch)];title.append(el('h1',name),el('span',recipeState.batch===1?'1 порция':`1 порция / ${recipeState.batch} ${word}`,'print-batch'));root.replaceChildren(title);const t=totals(recipeState.rows),summary=el('div',undefined,'print-summary');for(const key of keys){const metric=el('div');metric.append(el('span',key==='kcal'?'Ккал / порция':labels[key]),el('strong',`${t[key].toFixed(1)}${key==='kcal'?'':' г'}`));summary.append(metric);}root.append(summary);
-const blocks=el('div',undefined,'print-ingredients');for(const group of ingredientGroups(recipeState)){const block=el('section',undefined,'print-group '+group.kind);block.append(el('h2',group.title));for(const r of group.rows){const row=el('div',undefined,'print-item');row.append(el('span',catalog[r.key].name),el('strong',`${round1(r.g).toLocaleString('ru-RU')}${recipeState.batch>1?' / '+round1(r.g*recipeState.batch).toLocaleString('ru-RU'):''} г`));block.append(row);}if(!group.rows.length)block.append(el('div','—','print-item'));blocks.append(block);}root.append(blocks,el('h2','Сувид'),cookingCards(recipeState),el('p',displayPreparationDate(date),'print-footer'));const previous=document.title;document.title=name;window.addEventListener('afterprint',()=>{document.title=previous;},{once:true});window.print();}
+function printRecipe(saved=null){
+ const recipeState=saved?.state||state,date=preparedDate();if(!date)return;
+ if(!recipeState.rows.some(r=>r.g>0)){notice('Добавьте продукты для печати.');return;}
+ const name=cleanName(saved?.name||$('recipeName').value)||'Рецепт',root=$('printRecipe'),title=el('div',undefined,'print-title-row');
+ title.append(el('h1',name),el('span',preparationBatch(recipeState),'print-batch'));root.replaceChildren(title);
+ const t=totals(recipeState.rows),summary=el('div',undefined,'print-summary');
+ for(const key of keys){const metric=el('div');metric.append(el('span',key==='kcal'?'Ккал / порция':labels[key]),el('strong',`${round1(t[key]).toLocaleString('ru-RU')}${key==='kcal'?'':' г'}`));summary.append(metric);}
+ root.append(summary,preparationCards(recipeState),el('p',displayPreparationDate(date),'print-footer'));
+ const previous=document.title;document.title=name;window.addEventListener('afterprint',()=>{document.title=previous;},{once:true});window.print();
+}
+
 $('preparedDate').value=displayPreparationDate(localDateValue());$('preparedDate').oninput=()=>formatRussianDateInput($('preparedDate'));$('pdf').onclick=()=>printRecipe();
 function renderRecipes(){$('recipes').replaceChildren();$('recipes').className='recipe-list';for(const r of recipes){const line=el('div',undefined,'recipe'+(r.id===activeId?' active':'')),load=el('button',undefined,'recipe-load'),icons=el('span',undefined,'product-icons');[...new Set(r.state.rows.filter(row=>row.g>0).map(row=>row.key))].slice(0,4).forEach(k=>icons.append(foodIcon(k,30)));load.append(icons,el('span',cleanName(r.name),'recipe-title'));load.onclick=()=>loadRecipe(r.id);const pdf=el('button',undefined,'secondary recipe-pdf');pdf.append(documentIcon());pdf.setAttribute('aria-label','PDF '+cleanName(r.name));pdf.title='Скачать PDF';pdf.onclick=()=>printRecipe(r);const remove=el('button','×','remove');remove.setAttribute('aria-label','Удалить '+r.name);remove.onclick=()=>removeRecipe(r.id);line.append(load,pdf,remove);$('recipes').append(line);}$('libraryStatus').textContent=recipes.length?'':cloudReady?'Сохраните понравившийся расчёт в «Итоге».':'Сохраните понравившийся расчёт в «Итоге». Пока рецепты доступны на этом устройстве.';}
 function loadRecipe(id){if(cloudBusy){notice('Дождитесь завершения сохранения.');return;}const r=recipes.find(x=>x.id===id);if(!r)return;const loaded=structuredClone(r.state);state.rows=loaded.rows;state.rows.forEach(row=>row.g=quantize(row,row.g));state.batch=loaded.batch;state.thickness=loaded.thickness||10;activeId=r.id;openedRecord=structuredClone(r);customName=loaded.autoName!==true;$('recipeName').value=cleanName(r.name);lastCompositionKey=compositionKey();if(!customName)$('recipeName').value=recipeTitle();openedBaseline=recipeFingerprint(state,$('recipeName').value);renderRows();applyProfile();update();renderRecipes();notice('');}
@@ -231,7 +293,7 @@ if(updating){openedRecord=structuredClone(recipe);openedBaseline=fingerprint;}el
 renderRecipes();update();notice(`${updating?'Рецепт обновлён':'Новый рецепт сохранён'}${cloudReady?' в облако':' на устройстве'}.`);}
 $('saveRecipe').onclick=()=>saveRecipe('new');$('updateRecipe').onclick=()=>saveRecipe('update');
 async function removeRecipe(id){const r=recipes.find(x=>x.id===id);if(!r||!confirm(`Удалить «${r.name}»?`))return;if(cloudBusy)return;if(r.origin==='cloud'){if(!cloudReady){notice('Для удаления облачного рецепта нужен вход.');return;}try{await cloudRequest('/api/recipes/'+encodeURIComponent(id),{method:'DELETE',headers:{'If-Match':r.revision||''}});}catch(e){notice(e.status===409?'Рецепт изменён на другом устройстве. Синхронизируйте.':'Удалить не удалось.');return;}}recipes=recipes.filter(x=>x.id!==id);if(activeId===id){activeId=null;openedRecord=null;openedBaseline=null;}renderRecipes();update();}
-$('newRecipe').onclick=()=>{if(cloudBusy)return;state.rows=[];state.batch=1;activeId=null;openedRecord=null;openedBaseline=null;customName=false;lastCompositionKey=null;renderRows();update();renderRecipes();notice('Новый расчёт. Цели и профиль сохранены.');};
+$('newRecipe').onclick=()=>{if(cloudBusy)return;state.rows=[];state.batch=1;$('batch').value=1;activeId=null;openedRecord=null;openedBaseline=null;customName=false;lastCompositionKey=null;renderRows();update();renderRecipes();notice('Новый расчёт. Цели и профиль сохранены.');};
 $('export').onclick=()=>{const blob=new Blob([JSON.stringify({version:3,state,recipes},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download='nutrition-recipes.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 $('import').onchange=async e=>{if(cloudBusy){e.target.value='';return;}try{const file=e.target.files[0];if(!file)return;if(file.size>2000000)throw Error();const v=JSON.parse(await file.text());if(![2,3].includes(v.version)||!valid(v.state)||!Array.isArray(v.recipes)||v.recipes.length>500||!v.recipes.every(r=>typeof r.name==='string'&&r.name.length<=100&&valid(r.state)))throw Error();state.rows=structuredClone(v.state.rows);state.batch=v.state.batch;state.thickness=v.state.thickness||10;state.rows.forEach(r=>r.g=quantize(r,r.g));activeId=null;openedRecord=null;openedBaseline=null;customName=false;lastCompositionKey=null;const added=v.recipes.map(r=>snapshotRecipe({id:uid(),name:r.name,state:r.state,origin:'local',updatedAt:new Date().toISOString()}));recipes=[...added,...recipes];renderTargets();renderRows();applyProfile();update();renderRecipes();notice('Импортировано на устройство. Откройте рецепт и сохраните в облако.');}catch{notice('Нужен корректный JSON-экспорт до 2 МБ.');}e.target.value='';};
 async function cloudRequest(path,options={}){const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),15000);try{const headers={'Content-Type':'application/json',...(csrfToken?{'X-CSRF-Token':csrfToken}:{}),...(options.headers||{})};let endpoint=path;if(apiMode==='php'){const url=new URL('api/index.php',document.baseURI);url.searchParams.set('path',path.replace(/^\/api\//,''));endpoint=url.href;}const response=await fetch(endpoint,{credentials:'same-origin',...options,headers,signal:controller.signal});if(!response.ok){let msg='Ошибка сервера';try{msg=(await response.json()).error||msg;}catch{}const e=Error(msg);e.status=response.status;throw e;}return response.status===204?null:await response.json();}finally{clearTimeout(timeout);}}
@@ -254,3 +316,9 @@ applyProfile();renderTargets();renderRows();renderRecipes();if(customName){try{c
 function alignRecipeLibrary(){const picker=document.querySelector('.product-picker'),ingredient=document.querySelector('.ingredient'),scroll=$('recipesScroll');if(!picker||!ingredient)return;scroll.style.marginTop='0px';if(matchMedia('(min-width:801px)').matches){scroll.style.marginTop=Math.max(0,picker.getBoundingClientRect().top-scroll.getBoundingClientRect().top)+'px';}document.querySelector('.library').style.setProperty('--recipe-pitch',ingredient.getBoundingClientRect().height+'px');}
 new ResizeObserver(()=>requestAnimationFrame(alignRecipeLibrary)).observe(document.querySelector('.composition'));
 window.addEventListener('resize',alignRecipeLibrary);document.fonts.ready.then(alignRecipeLibrary);
+
+// Re-measure intrinsic card heights only after a width/font change, avoiding resize loops.
+let preparationWidth=0;
+new ResizeObserver(entries=>{const width=entries[0].contentRect.width;if(width!==preparationWidth){preparationWidth=width;requestAnimationFrame(()=>equalizePreparationCards($('cookPlan')));}}).observe($('cookPlan'));
+document.fonts.ready.then(()=>equalizePreparationCards($('cookPlan')));
+window.addEventListener('beforeprint',()=>equalizePreparationCards($('printRecipe')));
