@@ -39,7 +39,7 @@ try {
  $user=null;
  if(isset($_SESSION['user_id'])){$q=$db->prepare('SELECT id,username,email,email_verified_at,session_version FROM users WHERE id=?');$q->execute([$_SESSION['user_id']]);$user=$q->fetch()?:null;if(!$user||(int)$user['session_version']!==($_SESSION['version']??0)){unset($_SESSION['user_id'],$_SESSION['version']);$user=null;}}
  $method=$_SERVER['REQUEST_METHOD']??'GET';$route=trim((string)($_GET['path']??''),'/');
- if($method==='GET'&&$route==='session')respond(['authenticated'=>(bool)$user,'username'=>$user['username']??null,'authMode'=>'password','csrf'=>$_SESSION['csrf']]);
+ if($method==='GET'&&$route==='session')respond(['authenticated'=>(bool)$user,'username'=>$user['username']??null,'email'=>$user['email']??null,'emailVerified'=>(bool)($user['email_verified_at']??null),'authMode'=>'password','csrf'=>$_SESSION['csrf']]);
  if(!in_array($method,['GET','POST','PUT','DELETE'],true))fail('Method not allowed',405);
  if($method!=='GET'){
   $origin=$_SERVER['HTTP_ORIGIN']??'';$expected=($https?'https':'http').'://'.$host;
