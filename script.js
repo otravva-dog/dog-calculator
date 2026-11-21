@@ -143,7 +143,7 @@ const lock=el('input');lock.type='checkbox';lock.checked=!!r.locked;lock.disable
 const details=el('details',undefined,'ingredient-details');details.append(el('summary',r.key==='wakame'?'КБЖУ / 100 г · йод: только ручной ввод':'КБЖУ / 100 г'+(r.data?' · сохранено':'')));const fields=el('div',undefined,'kbju-fields');keys.forEach(k=>{const n=number(data(r)[k],0,.1);n.max=1000;n.oninput=()=>{if(!n.validity.valid||n.value==='')return;r.data={...data(r),[k]:n.valueAsNumber};update();};fields.append(makeLabel(labels[k],n));});const reset=el('button','Сбросить','text-button');reset.onclick=()=>{delete r.data;renderRows();update();};fields.append(reset);details.append(fields);card.append(details);$('ingredients').append(card);});}
 function add(key,g){if(state.rows.length>=40){notice('Не более 40 строк.');return;}state.rows.push({key,g,locked:false});renderRows();update();}
 $('addProtein').onclick=()=>add('turkey_breast',50);$('addPlant').onclick=()=>add('zucchini',30);$('addOil').onclick=()=>{if(state.rows.some(r=>r.key==='oil')){notice('Масло уже в составе.');return;}add('oil',0);};
-function update(){const signature=compositionKey();if(lastCompositionKey!==null&&signature!==lastCompositionKey)customName=false;lastCompositionKey=signature;const t=totals();$('mass').textContent=`${state.rows.reduce((s,r)=>s+r.g,0)} г / порция`;$('metrics').replaceChildren();keys.forEach(k=>{const [lo,hi]=state.targets[k],ok=(lo===null||t[k]>=lo-1e-8)&&(hi===null||t[k]<=hi+1e-8),m=el('div',undefined,'metric'),top=el('div',undefined,'metric-top');top.append(el('span',labels[k]),el('strong',t[k].toFixed(1)+(k==='kcal'?'':' г')));m.append(top,el('small',lo===null&&hi===null?'Без ограничения':`${lo??'—'}–${hi??'—'} ${k==='kcal'?'ккал':'г'}`));const track=el('div',undefined,'track'),fill=el('div',undefined,'fill '+(ok?'ok':''));fill.style.width=Math.min(100,t[k]/(hi||lo||Math.max(t[k],1))*100)+'%';track.append(fill);m.append(track,el('div',lo===null&&hi===null?'Справочно':ok?'✓ В диапазоне':lo!==null&&t[k]<lo?`−${(lo-t[k]).toFixed(1)} до цели`:`+${(t[k]-hi).toFixed(1)} сверх цели`,'status '+(ok?'ok':'')));$('metrics').append(m);});if(!customName)$('recipeName').value=recipeTitle();syncRecipeActions();$('shopping').replaceChildren();const list=el('div',undefined,'shopping-list');const grouped=new Map;state.rows.filter(r=>r.g>0).forEach(r=>grouped.set(r.key,(grouped.get(r.key)||0)+r.g*state.batch));for(const [key,g]of grouped){const item=el('span',undefined,'shopping-item');item.append(foodIcon(key,24),document.createTextNode(`${catalog[key].name}: ${g.toFixed(0)} г`));list.append(item);}$('shopping').append(list);renderCooking();estimate();renderNutrition();const invalidProfile=state.targetMode==='profile'&&!lastEnergyModel;$('fit').disabled=invalidProfile;$('targetProfileStatus').textContent=invalidProfile?'Проверьте профиль или переключите цели на ручные.':'';if(targetError())notice('Проверьте диапазоны целей.');persist();}
+function update(){const signature=compositionKey();if(lastCompositionKey!==null&&signature!==lastCompositionKey)customName=false;lastCompositionKey=signature;const t=totals();$('mass').textContent=`${state.rows.reduce((s,r)=>s+r.g,0)} г / порция`;$('metrics').replaceChildren();keys.forEach(k=>{const [lo,hi]=state.targets[k],ok=(lo===null||t[k]>=lo-1e-8)&&(hi===null||t[k]<=hi+1e-8),m=el('div',undefined,'metric'),top=el('div',undefined,'metric-top');top.append(el('span',labels[k]),el('strong',t[k].toFixed(1)+(k==='kcal'?'':' г')));m.append(top,el('small',lo===null&&hi===null?'Без ограничения':`${lo??'—'}–${hi??'—'} ${k==='kcal'?'ккал':'г'}`));const track=el('div',undefined,'track'),fill=el('div',undefined,'fill '+(ok?'ok':''));fill.style.width=Math.min(100,t[k]/(hi||lo||Math.max(t[k],1))*100)+'%';track.append(fill);m.append(track,el('div',lo===null&&hi===null?'Справочно':ok?'✓ В диапазоне':lo!==null&&t[k]<lo?`−${(lo-t[k]).toFixed(1)} до цели`:`+${(t[k]-hi).toFixed(1)} сверх цели`,'status '+(ok?'ok':'')));$('metrics').append(m);});if(!customName)$('recipeName').value=recipeTitle();syncRecipeActions();renderCooking();estimate();renderNutrition();const invalidProfile=state.targetMode==='profile'&&!lastEnergyModel;$('fit').disabled=invalidProfile;$('targetProfileStatus').textContent=invalidProfile?'Проверьте профиль или переключите цели на ручные.':'';if(targetError())notice('Проверьте диапазоны целей.');persist();}
 // Search uses kitchen-measurable increments, never fractional oil or vegetables.
 function fitRows(rows,targets){const scales={kcal:15,p:3,f:2,c:3},start=rows.map(r=>quantize(r,r.g)),free=rows.map((r,i)=>!r.locked&&r.key!=='wakame'?i:-1).filter(i=>i>=0),vectors=rows.map(r=>keys.map(k=>data(r)[k]/100));
 const score=w=>{const t=[0,0,0,0];w.forEach((g,i)=>vectors[i].forEach((v,k)=>t[k]+=v*g));return keys.reduce((s,k,j)=>{const [lo,hi]=targets[k],d=lo!==null&&t[j]<lo?lo-t[j]:hi!==null&&t[j]>hi?t[j]-hi:0;return s+(d/scales[k])**2;},0)+w.reduce((s,g,i)=>s+((g-start[i])/Math.max(30,start[i]))**2,0)*1e-7;};
@@ -199,7 +199,7 @@ new ResizeObserver(()=>requestAnimationFrame(alignRecipeLibrary)).observe(docume
 window.addEventListener('resize',alignRecipeLibrary);document.fonts.ready.then(alignRecipeLibrary);
 
 
-const profileIds=['dogName','breed','dogWeight','birthDate','age','sex','neutered','lifeStage','matingDate','birthLitterDate','puppies','preWeight','puppySolids','adultWeight','energyMethod','activity','customK','housing','weather','share','homeMeals','dryName','dryGrams','dryKcal','dryProtein','dryFat','dryCarbs'];
+const profileIds=['dogName','breed','dogWeight','birthDate','age','sex','neutered','lifeStage','matingDate','birthLitterDate','puppies','preWeight','puppySolids','adultWeight','energyMethod','activity','customK','housing','weather','share','homeMeals','dryFoodId','dryFoodRevision','dryName','dryGrams','dryKcal','dryProtein','dryFat','dryCarbs'];
 const PROFILE_DEFAULTS=Object.fromEntries(profileIds.map(k=>[k,$(k).value]));
 let profileRevision=0,profileDirty=false,profileSaving=false,profileSaveTimer=null,profileConflict=false,profileOwner=null;
 function calendarAge(value,today=localDateValue()){
@@ -277,10 +277,10 @@ function estimate(){
 function applyProfile(){
  const profile={...(state.profile||{})};if(profile.activity==='1')profile.activity='110';if(profile.activity==='0.85')profile.activity='95';if(profile.activity==='1.25')profile.activity='125';if(profile.neutered==='1.8')profile.neutered='intact';if(profile.neutered==='1.6')profile.neutered='neutered';
  if(profile.breed&&![...$('breed').options].some(o=>o.value===profile.breed))$('breed').append(new Option(String(profile.breed).slice(0,100),String(profile.breed).slice(0,100)));
- profileIds.forEach(k=>{$(k).value=profile[k]??PROFILE_DEFAULTS[k];if($(k).tagName==='SELECT'&&!$(k).value)$(k).value=PROFILE_DEFAULTS[k];});$('batch').value=state.batch;$('targetMode').value=state.targetMode||'manual';
+ profileIds.forEach(k=>{$(k).value=profile[k]??PROFILE_DEFAULTS[k];if($(k).tagName==='SELECT'&&!$(k).value)$(k).value=PROFILE_DEFAULTS[k];});$('batch').value=state.batch;$('targetMode').value=state.targetMode||'manual';syncDryFoodSelection();
 }
 function profileTargetUpdate(){if((state.targetMode||'manual')!=='profile')return;const kcal=estimate();if(kcal===null)return;const proposed=scaledTargets(kcal);if(proposed.kcal[1]>10000){notice('Проверьте профиль: цель превышает 10 000 ккал.');return;}state.targets=proposed;renderTargets();}
-profileIds.forEach(id=>{$(id).oninput=()=>{if(['birthDate','matingDate','birthLitterDate'].includes(id))formatRussianDateInput($(id));state.profile=Object.fromEntries(profileIds.map(k=>[k,$(k).value]));profileTargetUpdate();update();queueProfileSave();};});
+profileIds.filter(id=>!['dryFoodId','dryFoodRevision'].includes(id)).forEach(id=>{$(id).oninput=()=>{if(['dryName','dryKcal','dryProtein','dryFat','dryCarbs'].includes(id))detachDryFood();if(['birthDate','matingDate','birthLitterDate'].includes(id))formatRussianDateInput($(id));state.profile=Object.fromEntries(profileIds.map(k=>[k,$(k).value]));profileTargetUpdate();update();queueProfileSave();};});
 $('targetMode').onchange=()=>{state.targetMode=$('targetMode').value;profileTargetUpdate();update();queueProfileSave();};
 $('applyEstimate').onclick=()=>{if(estimate()===null)return;state.targetMode='profile';$('targetMode').value='profile';profileTargetUpdate();update();queueProfileSave();};
 
@@ -490,8 +490,37 @@ window.addEventListener('focus',()=>autoSync());document.addEventListener('visib
 document.addEventListener('click',event=>{if(!$('accountMenu').contains(event.target))$('accountMenu').open=false;});document.addEventListener('keydown',event=>{if(event.key==='Escape')$('accountMenu').open=false;});
 
 
+function initDryFoodCatalog(){
+ const select=$('dryFoodId');select.replaceChildren(new Option('Свои данные',''));const groups=new Map;
+ for(const food of DRY_FOOD_CATALOG){if(!groups.has(food.brand)){const group=el('optgroup');group.label=food.brand;groups.set(food.brand,group);select.append(group);}groups.get(food.brand).append(new Option(food.name,food.id));}
+ select.onchange=()=>selectDryFood(select.value);
+}
+function selectedDryFood(){const food=DRY_FOOD_CATALOG.find(f=>f.id===$('dryFoodId').value);return food&&$('dryFoodRevision').value===food.revision?food:null;}
+function dryCarbohydrates(food){const values=[food.protein,food.fat,food.ash,food.moisture],sum=values.reduce((a,b)=>a+b,0);return values.every(Number.isFinite)&&sum<=100?Math.round((100-sum)*10)/10:null;}
+function syncDryFoodSelection(){
+ const food=selectedDryFood();if(!food){$('dryFoodId').value='';$('dryFoodRevision').value='';if(state.profile){state.profile.dryFoodId='';state.profile.dryFoodRevision='';}}
+ $('dryCustomName').hidden=!!food;$('dryFoodSource').hidden=!food;$('dryFoodAdditives').hidden=!food;
+ $('dryFoodSource').replaceChildren();$('dryFoodAdditiveList').replaceChildren();if(!food)return;
+ const fmt=n=>n.toLocaleString('ru-RU',{maximumFractionDigits:3});
+ const source=el('a','Производитель');source.href=food.url;source.target='_blank';source.rel='noopener noreferrer';
+ const origin=el('p');origin.append(source,document.createTextNode(` · проверено ${food.checked}`));
+ $('dryFoodSource').append(el('p',`${food.brand} · ${food.variant}`,'dry-source-recipe'),el('p',food.ingredients),origin,el('p',`Углеводы ≈ ${fmt(dryCarbohydrates(food))} г/100 г — расчётные, включая клетчатку.`));
+ const totals=Object.entries(food.totals).map(([key,n])=>`${({ca:'Ca',p:'P',mg:'Mg'})[key]||key} ${fmt(n)}%`);
+ $('dryFoodAnalysis').textContent=`На 100 г: ${totals.join(' · ')}. Клетчатка ${fmt(food.fiber)}% · зола ${fmt(food.ash)}% · влажность ${fmt(food.moisture)}%.${food.analysisKind==='guaranteed'?' Гарантированный анализ; расчёт углеводов приблизительный.':''}`;
+ for(const [name,value,unit]of food.additives){const row=el('div');row.append(el('dt',name),el('dd',`${fmt(value)} ${unit}`));$('dryFoodAdditiveList').append(row);}
+}
+function detachDryFood(){if(!$('dryFoodId').value)return;$('dryFoodId').value='';$('dryFoodRevision').value='';syncDryFoodSelection();}
+function selectDryFood(id){
+ const food=DRY_FOOD_CATALOG.find(f=>f.id===id);$('dryFoodRevision').value=food?.revision||'';
+ if(food){$('dryName').value=`${food.brand} · ${food.name}`.slice(0,100);for(const [key,field]of [['kcal','dryKcal'],['protein','dryProtein'],['fat','dryFat']])$(field).value=food[key];$('dryCarbs').value=dryCarbohydrates(food)??'';
+  // Only declared total minerals are eligible for the day calculation. Additives remain separate.
+  microPlan.dryBasis='100';microPlan.dryValues=structuredClone(food.totals);try{localStorage.setItem('nutrition_micro_v1',JSON.stringify(microPlan));}catch{}renderMicroInputs();
+ }
+ state.profile=Object.fromEntries(profileIds.map(k=>[k,$(k).value]));syncDryFoodSelection();update();queueProfileSave();
+}
+
 function markManualTargets(){if((state.targetMode||'manual')==='profile'){state.targetMode='manual';$('targetMode').value='manual';queueProfileSave();}}
 function resetAccountPreferences(){clearTimeout(profileSaveTimer);profileDirty=false;profileConflict=false;microPlan=microDefaults();try{localStorage.removeItem('nutrition_micro_v1');}catch{}renderMicroInputs();}
-applyProfile();renderTargets();renderRows();renderRecipes();renderMicroInputs();
+initDryFoodCatalog();applyProfile();renderTargets();renderRows();renderRecipes();renderMicroInputs();
 if(customName){try{const saved=JSON.parse(localStorage.getItem('nutrition_v3')||'null');if(saved?.name)$('recipeName').value=cleanName(saved.name);}catch{}}
 profileTargetUpdate();update();const initialCloud=initCloud();initialCloud.then(handleAccountLink);window.addEventListener('hashchange',()=>initialCloud.then(handleAccountLink));
