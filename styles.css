@@ -39,3 +39,5 @@ button.primary{background:#365c4c;border-color:#365c4c;color:#fff}#fit{backgroun
 @media print{#printRecipe .print-cooking{grid-template-columns:repeat(var(--cook-columns,5),minmax(0,1fr));gap:8px}#printRecipe .print-cooking .cook-card{padding:9px 8px}#printRecipe .print-cooking h3{overflow-wrap:anywhere}#printRecipe .print-cooking .cook-time{font-size:12px;line-height:1.5}}
 
 .auth-tabs{flex-wrap:wrap}
+
+.label-font-control{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center}.label-font-control output{font-size:13px;font-weight:650;color:var(--ink)}#labelFontSize{grid-column:1/-1;width:100%;height:28px;margin:0;padding:0;border:0;box-shadow:none;accent-color:#426bb4;cursor:pointer}
