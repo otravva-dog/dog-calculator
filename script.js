@@ -198,12 +198,12 @@ $('signOut').onclick=async()=>{try{await cloudRequest('/api/auth/logout',{method
 async function handleAccountLink(){const hash=location.hash;if(!/^#(?:reset|verify)=/.test(hash))return;history.replaceState(null,'',location.pathname+location.search);const match=hash.match(/^#(reset|verify)=([a-f0-9]{64})$/);if(!match){accountNotice('Ссылка недействительна. Запросите новую.');return;}if(!csrfToken){accountNotice('Для этой ссылки нужен сайт с подключённым сервером.');return;}if(match[1]==='reset'){resetToken=match[2];openAuth('reset');return;}try{const result=await cloudRequest('/api/auth/verify-email',{method:'POST',body:JSON.stringify({token:match[2]})});await initCloud();accountNotice(result.message);}catch(e){accountNotice(e.message);}}
 $('refreshCloud').onclick=refreshCloud;
 
-function alignRecipeLibrary(){const picker=document.querySelector('.product-picker'),ingredient=document.querySelector('.ingredient'),scroll=$('recipesScroll');if(!picker||!ingredient)return;scroll.style.marginTop='0px';if(matchMedia('(min-width:801px)').matches){scroll.style.marginTop=Math.max(0,picker.getBoundingClientRect().top-scroll.getBoundingClientRect().top)+'px';}document.querySelector('.library').style.setProperty('--recipe-pitch',ingredient.getBoundingClientRect().height+'px');}
+function alignRecipeLibrary(){const group=document.querySelector('.ingredient-group'),scroll=$('recipesScroll');if(!group||!scroll)return;scroll.style.marginTop='0px';if(matchMedia('(min-width:801px)').matches)scroll.style.marginTop=Math.max(0,group.getBoundingClientRect().top-scroll.getBoundingClientRect().top)+'px';}
 new ResizeObserver(()=>requestAnimationFrame(alignRecipeLibrary)).observe(document.querySelector('.composition'));
 window.addEventListener('resize',alignRecipeLibrary);document.fonts.ready.then(alignRecipeLibrary);
 
 
-const profileIds=['dogName','breed','dogWeight','birthDate','age','sex','neutered','lifeStage','matingDate','birthLitterDate','puppies','preWeight','puppySolids','adultWeight','energyMethod','activity','customK','housing','weather','share','homeMeals','dryFoodId','dryFoodRevision','dryName','dryGrams','dryKcal','dryProtein','dryFat','dryCarbs','dayMode','manualDaily','treatKcal'];
+const profileIds=['dogName','breed','dogWeight','birthDate','age','sex','neutered','lifeStage','matingDate','birthLitterDate','puppies','preWeight','puppySolids','adultWeight','energyMethod','activity','customK','housing','weather','share','homeMeals','dryFoodId','dryFoodRevision','dryName','dryGrams','dryKcal','dryProtein','dryFat','dryCarbs','dayMode','manualDaily','treatKcal','dryAllocation'];
 const PROFILE_DEFAULTS=Object.fromEntries(profileIds.map(k=>[k,$(k).value]));
 let profileRevision=0,profileDirty=false,profileSaving=false,profileSaveTimer=null,profileConflict=false,profileOwner=null;
 function calendarAge(value,today=localDateValue()){
@@ -282,12 +282,35 @@ function estimate(){
  const known=['dryProtein','dryFat','dryCarbs'].map(profileNumber).filter(v=>v!==null);$('dryWarning').textContent=known.reduce((a,b)=>a+b,0)>100?'Сумма БЖУ превышает 100 г.':'';
  renderDayActual();return model.portion;
 }
+function recipeDryCalculation(){
+ const model=lastEnergyModel;if(!model)return {status:'profile'};
+ const meals=+$('share').value>0?profileNumber('homeMeals'):0,t=totals(),treats=profileNumber('treatKcal')??0;
+ if(meals===null||meals>0&&(!state.rows.some(r=>r.g>0)||t.kcal<=0))return {status:'recipe'};
+ const home=t.kcal*meals,remaining=model.daily-home-treats,density=profileNumber('dryKcal');
+ if(remaining<-.000001)return {status:'excess',grams:0,dryEnergy:0,home,treats,meals,daily:model.daily,excess:-remaining};
+ if(remaining>.000001&&!(density>0))return {status:'food',home,treats,meals,daily:model.daily,remaining};
+ return {status:'ready',grams:remaining<=0?0:remaining/density*100,dryEnergy:Math.max(0,remaining),home,treats,meals,daily:model.daily};
+}
+function usesRecipeDry(){return $('dryAllocation').value==='recipe';}
+function effectiveDryGrams(){if(usesRecipeDry()){const result=recipeDryCalculation();return ['ready','excess'].includes(result.status)?result.grams:null;}return profileNumber('dryGrams');}
+function renderRecipeDryResult(){
+ const root=$('recipeDryResult'),r=recipeDryCalculation(),active=usesRecipeDry();root.replaceChildren();root.dataset.status=r.status;
+ const head=el('div',undefined,'recipe-dry-head');head.append(el('h3','Сухой корм с этим рецептом'),el('span','На день','muted'));root.append(head);
+ if(r.status==='ready'||r.status==='excess'){
+  const body=el('div',undefined,'recipe-dry-body'),amount=el('div',undefined,'recipe-dry-amount');amount.append(el('strong',(r.grams>0?'≈':'')+Math.round(r.grams)),el('span','г / сутки'));body.append(amount);
+  const detail=el('div',undefined,'recipe-dry-detail'),fmt=n=>Math.round(n).toLocaleString('ru-RU');detail.append(el('p',r.grams>0?$('dryName').value||'Сухой корм':'Сухой корм не требуется'));
+  detail.append(el('p',r.status==='excess'?`Натуральная еда и лакомства превышают цель на ${fmt(r.excess)} ккал.`:`${fmt(r.daily)} − ${fmt(r.home)}${r.treats?' − '+fmt(r.treats):''} ≈ ${fmt(r.dryEnergy)} ккал на сухой корм`,'recipe-dry-formula'));body.append(detail);root.append(body);
+ }else root.append(el('p',r.status==='profile'?'Заполните профиль для расчёта.':r.status==='recipe'?'Добавьте продукты с положительным весом.':`Остаётся ${Math.round(r.remaining)} ккал. Выберите сухой корм или укажите его калорийность в профиле.`,'recipe-dry-unavailable'));
+ const bottom=el('div',undefined,'recipe-dry-bottom'),status=el('span',active?'В балансе: сухой корм по текущему рецепту.':'В балансе пока используется план из профиля.','muted'),button=el('button',active?'Вернуть план профиля':'Учесть в балансе','secondary');button.type='button';button.id='useRecipeDry';button.disabled=!active&&r.status!=='ready';button.title='Пересчёт корректирует калорийность дня; БЖУ и минералы оцениваются отдельно.';
+ button.onclick=()=>{$('dryAllocation').value=active?'plan':'recipe';state.profile=Object.fromEntries(profileIds.map(id=>[id,$(id).value]));update();queueProfileSave();};bottom.append(status,button);root.append(bottom);
+}
+
 function renderDayActual(){
- const root=$('dayActual');root.replaceChildren();if(!lastEnergyModel)return;
- const t=totals(),g=profileNumber('dryGrams'),meals=+$('share').value>0?Number($('homeMeals').value):0;
- const card=el('details'),title=el('summary','Рацион за день'),grid=el('div',undefined,'day-metrics');
- for(const [k,id]of [['kcal','dryKcal'],['p','dryProtein'],['f','dryFat'],['c','dryCarbs']]){const v=profileNumber(id),value=k==='kcal'?t.kcal*meals+lastEnergyModel.dryEnergy+(profileNumber('treatKcal')||0):g===0?t[k]*meals:g!==null&&v!==null?t[k]*meals+g*v/100:null;const metric=el('div');metric.append(el('span',labels[k]),el('strong',value===null?'—':round1(value).toLocaleString('ru-RU')+(k==='kcal'?'':' г')));grid.append(metric);}
- card.append(title,grid,el('p','Текущий рецепт × кормления + сухой корм по плану. Лакомства учтены только в энергии.','muted'));root.append(card);
+ renderRecipeDryResult();const root=$('dayActual');root.replaceChildren();if(!lastEnergyModel)return;
+ const t=totals(),g=effectiveDryGrams(),r=recipeDryCalculation(),meals=+$('share').value>0?Number($('homeMeals').value):0;
+ const card=el('details'),title=el('summary','Рацион за день · '+(usesRecipeDry()?'сухой корм по рецепту':'сухой корм по плану')),grid=el('div',undefined,'day-metrics');
+ for(const [k,id]of [['kcal','dryKcal'],['p','dryProtein'],['f','dryFat'],['c','dryCarbs']]){const v=profileNumber(id),value=k==='kcal'?(usesRecipeDry()?['ready','excess'].includes(r.status)?t.kcal*meals+r.dryEnergy+(profileNumber('treatKcal')||0):null:t.kcal*meals+lastEnergyModel.dryEnergy+(profileNumber('treatKcal')||0)):g===0?t[k]*meals:g!==null&&v!==null?t[k]*meals+g*v/100:null;const metric=el('div');metric.append(el('span',labels[k]),el('strong',value===null?'—':round1(value).toLocaleString('ru-RU')+(k==='kcal'?'':' г')));grid.append(metric);}
+ card.append(title,grid,el('p','Текущий рецепт × кормления + сухой корм. Лакомства учтены только в энергии.','muted'));root.append(card);
 }
 function applyProfile(){
  const profile={...(state.profile||{})};if(profile.activity==='1')profile.activity='110';if(profile.activity==='0.85')profile.activity='95';if(profile.activity==='1.25')profile.activity='125';if(profile.neutered==='1.8')profile.neutered='intact';if(profile.neutered==='1.6')profile.neutered='neutered';
@@ -295,7 +318,7 @@ function applyProfile(){
  profileIds.forEach(k=>{$(k).value=profile[k]??PROFILE_DEFAULTS[k];if($(k).tagName==='SELECT'&&!$(k).value)$(k).value=PROFILE_DEFAULTS[k];});$('batch').value=state.batch;$('targetMode').value=state.targetMode||'manual';syncDryFoodSelection();
 }
 function profileTargetUpdate(){if((state.targetMode||'manual')!=='profile')return;const kcal=estimate();if(kcal===null||kcal<=0)return;const proposed=scaledTargets(kcal);if(proposed.kcal[1]>10000){notice('Проверьте профиль: цель превышает 10 000 ккал.');return;}state.targets=proposed;renderTargets();}
-profileIds.filter(id=>!['dryFoodId','dryFoodRevision','dryGrams'].includes(id)).forEach(id=>{$(id).oninput=()=>{if(['dryName','dryKcal','dryProtein','dryFat','dryCarbs'].includes(id))detachDryFood();if(['birthDate','matingDate','birthLitterDate'].includes(id))formatRussianDateInput($(id));refreshDryOptions();state.profile=Object.fromEntries(profileIds.map(k=>[k,$(k).value]));if(['dryName','dryKcal','dryProtein','dryFat','dryCarbs'].includes(id))syncDryFoodSelection();profileTargetUpdate();update();queueProfileSave();};});
+profileIds.filter(id=>!['dryFoodId','dryFoodRevision','dryGrams','dryAllocation'].includes(id)).forEach(id=>{$(id).oninput=()=>{if(['dryName','dryKcal','dryProtein','dryFat','dryCarbs'].includes(id))detachDryFood();if(['birthDate','matingDate','birthLitterDate'].includes(id))formatRussianDateInput($(id));refreshDryOptions();state.profile=Object.fromEntries(profileIds.map(k=>[k,$(k).value]));if(['dryName','dryKcal','dryProtein','dryFat','dryCarbs'].includes(id))syncDryFoodSelection();profileTargetUpdate();update();queueProfileSave();};});
 $('targetMode').onchange=()=>{state.targetMode=$('targetMode').value;profileTargetUpdate();update();queueProfileSave();};
 $('applyEstimate').onclick=()=>{if(estimate()===null||+$('share').value===0)return;state.targetMode='profile';$('targetMode').value='profile';profileTargetUpdate();update();queueProfileSave();};
 
@@ -326,12 +349,12 @@ function nutrientDay(id){
  let home=0,homeComplete=true;const missing=[];
  for(const row of state.rows.filter(r=>r.g>0&&+$('share').value>0)){const v=microFoodValue(row.key,id);if(v===null){homeComplete=false;missing.push(shortProductName(row.key));}else home+=v*row.g/100;}
  home*=+$('share').value>0?(Number($('homeMeals').value)||1):0;
- const grams=$('dryGrams').value!==''&&$('dryGrams').validity.valid?+$('dryGrams').value:null,per=microPlan.dryValues[id];const dry=grams===0?0:grams!==null&&Number.isFinite(per)?grams*per/Number(microPlan.dryBasis):null;
+ const grams=effectiveDryGrams(),per=microPlan.dryValues[id];const dry=grams===0?0:grams!==null&&Number.isFinite(per)?grams*per/Number(microPlan.dryBasis):null;
  let supplements=0,supplementsComplete=true;for(const s of microPlan.supplements.filter(s=>s.dose>0)){const v=s.values[id];const dose=scheduledSupplementDose(s);if(dose===null){supplementsComplete=false;missing.push(s.name||'Добавка');}else if(dose>0){if(!Number.isFinite(v)){supplementsComplete=false;missing.push(s.name||'Добавка');}else supplements+=v*dose;}}
  if(dry===null)missing.push('Сухой корм');if((profileNumber('treatKcal')||0)>0)missing.push('Лакомства');return {home,dry,supplements,complete:homeComplete&&dry!==null&&supplementsComplete&&profileNumber('treatKcal')===0,total:home+(dry||0)+supplements,homeComplete,supplementsComplete,missing};
 }
 function renderNutrition(){
- const body=$('microTable');if(!body)return;const select=$('microFood'),foodKeys=[...new Set(state.rows.filter(r=>r.g>0).map(r=>r.key))];if([...select.options].map(o=>o.value).join(',')!==foodKeys.join(',')){const previous=select.value;select.replaceChildren(...foodKeys.map(k=>new Option(catalog[k].name,k)));if(foodKeys.includes(previous))select.value=previous;renderFoodMicro();}body.replaceChildren();
+ const body=$('microTable');if(!body)return;$('balanceContext').textContent='Натуральная еда + сухой корм '+(usesRecipeDry()?'по текущему рецепту':'по плану профиля')+' + добавки.';const select=$('microFood'),foodKeys=[...new Set(state.rows.filter(r=>r.g>0).map(r=>r.key))];if([...select.options].map(o=>o.value).join(',')!==foodKeys.join(',')){const previous=select.value;select.replaceChildren(...foodKeys.map(k=>new Option(catalog[k].name,k)));if(foodKeys.includes(previous))select.value=previous;renderFoodMicro();}body.replaceChildren();
  for(const meta of MICRO_META){const [key,title,unit]=meta,d=nutrientAssessment(meta),row=el('tr'),fmt=v=>nutrientFormat(v,unit);row.append(el('th',title));for(const text of [(d.homeComplete?'':'≥ ')+fmt(d.home),d.dry===null?'Нет данных':fmt(d.dry),(d.supplementsComplete?'':'≥ ')+fmt(d.supplements),(d.complete?'':'≥ ')+fmt(d.total),d.ref===null?'Индивидуально':'от '+fmt(d.ref)])row.append(el('td',text));row.append(el('td',({individual:'Нужен индивидуальный ориентир',unknown:'Неполные данные',low:'Ниже цели',high:'Выше пищевого максимума',covered:'Минимум покрыт'})[d.status]));body.append(row);}
  $('calciumRatio').textContent='';$('microAdvice').replaceChildren();$('microBasis').textContent=lastEnergyModel?`Цели на сутки · FEDIAF 2025 · ${Math.round(lastEnergyModel.daily)} ккал. Расчёт учитывает текущий рецепт, сухой корм и выбранный день приёма добавок.`:'Для расчёта целей заполните профиль собаки.';renderMineralCards();
 }
