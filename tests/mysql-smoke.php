@@ -1,0 +1,20 @@
+<?php
+declare(strict_types=1);
+require dirname(__DIR__).'/app/Support/Cli.php';
+use Nutrition\Support\Database;use Nutrition\Support\Schema;use Nutrition\Support\LegacyMigration;
+use Nutrition\Modules\Dogs\Repository as Dogs;use Nutrition\Modules\Profiles\Repository as Profiles;use Nutrition\Modules\Recipes\Repository as Recipes;use Nutrition\Modules\Catalog\Repository as Catalog;
+function check(bool $condition,string $message): void {if(!$condition)throw new RuntimeException($message);}
+try{
+ if(getenv('NUTRITION_TESTING')!=='1')throw new RuntimeException('Synthetic test only: set NUTRITION_TESTING=1');$o=cliOptions();$config=Database::configuration($o['private']);if(!str_ends_with($config['database']??'','_test'))throw new RuntimeException('Use a dedicated *_test database');
+ $db=Database::connect($o['private'],null,false);Schema::apply($db);check((int)$db->query('SELECT COUNT(*) FROM users')->fetchColumn()===0,'Refusing to change a nonempty test database');
+ $dir=sys_get_temp_dir().'/nutrition-fixture-'.bin2hex(random_bytes(6));mkdir($dir,0700);$src=Database::connect($dir,['driver'=>'sqlite']);$hash=password_hash('synthetic-old-password',PASSWORD_DEFAULT);$src->prepare('INSERT INTO users(id,username,password_hash,recovery_hash) VALUES(1,?,?,?)')->execute(['fixture-user',$hash,'unused']);
+ $state=['rows'=>[['key'=>'turkey_thigh','g'=>135,'data'=>['kcal'=>116,'p'=>20.6,'f'=>3.69,'c'=>0]]],'targets'=>['kcal'=>[310,330],'p'=>[22,33],'f'=>[9,22],'c'=>[null,null]],'batch'=>8];$src->prepare('INSERT INTO recipes VALUES(1,?,?,?,5,?)')->execute(['fixture-recipe','Собственное название',json_encode($state),gmdate('c')]);
+ $profile=['version'=>32,'targetMode'=>'profile','profile'=>['dogName'=>'Тестовая собака','dogWeight'=>'14','share'=>'50','treatKcal'=>'','weather'=>''],'microPlan'=>['dryBasis'=>'100','dryValues'=>['ca'=>1.2,'i'=>null],'foodOverrides'=>new stdClass,'supplements'=>[['name'=>'Тестовая добавка','dose'=>1,'unit'=>'табл.','values'=>['ca'=>.075]]]]];$src->prepare('INSERT INTO preferences VALUES(1,?,7,?)')->execute([json_encode($profile),gmdate('c')]);unset($src);
+ $path=$dir.'/recipes.sqlite';$before=hash_file('sha256',$path);$migration=new LegacyMigration($path);$migration->apply($db);$migration->verify($db);check(hash_file('sha256',$path)===$before,'Source database changed');check($migration->apply($db)['alreadyImported'],'Repeat import must be idempotent');
+ $dogs=new Dogs($db,1);$first=$dogs->first();$second=$dogs->create('Вторая собака');check((new Recipes($db,1,$second))->all()===[],'Recipe library leaked between dogs');$p=(new Profiles($db,1,$first))->get();check($p['revision']===7&&$p['data']->profile->treatKcal==='','Profile changed in migration');
+ $store=new Recipes($db,1,$first);$store->save('fixture-recipe','Собственное название',$state,5);try{$store->save('fixture-recipe','Lost',$state,5);throw new RuntimeException('Missing conflict');}catch(RuntimeException $e){check($e->getMessage()==='conflict','Wrong conflict result');}
+ check((int)$db->query('SELECT COUNT(*) FROM recipe_versions')->fetchColumn()===2,'Recipe history is missing');
+ $catalog=new Catalog($db);$catalog->import();$count=(int)$db->query('SELECT COUNT(*) FROM catalog_revisions')->fetchColumn();$catalog->import();check((int)$db->query('SELECT COUNT(*) FROM catalog_revisions')->fetchColumn()===$count,'Catalog duplicates');
+ $q=$db->query("SELECT n.nutrient_code,n.value FROM catalog_nutrients n JOIN catalog_active_revisions a ON a.revision_id=n.revision_id WHERE a.product_id='raw_food:turkey_thigh'");$n=$q->fetchAll(PDO::FETCH_KEY_PAIR);check((float)$n['protein']===20.6&&(float)$n['p']===.177,'Protein and phosphorus mixed');check(array_key_exists('i',$n)&&$n['i']===null,'Unknown iodine became zero');
+ check((int)$db->query('SELECT COUNT(*) FROM audit_events')->fetchColumn()>0,'Audit missing');echo "PASS MySQL: readonly migration, identities, revisions, snapshots, dogs, catalog versions, nutrient units, unknowns, audit.\n";
+}catch(Throwable $e){fwrite(STDERR,'Test failed: '.$e->getMessage().PHP_EOL);exit(1);}

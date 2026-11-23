@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict'),C=require('../calculator-core.js');
+const base={weight:13.2,age:1.5,ageDays:548,dayMode:'profile',method:'fediaf-activity',activity:110,neutered:'intact',sex:'female',stage:'normal',share:50,homeMeals:1,treatKcal:0,weather:0};
+const close=(a,b)=>assert(Math.abs(a-b)<1e-7,`${a} != ${b}`);
+let e=C.energyModel(base);assert(e.daily>760&&e.daily<762);close(e.naturalDaily,e.dryEnergy);close(e.portion,e.naturalDaily);
+e=C.energyModel({...base,share:30,homeMeals:2,treatKcal:40});close(e.portion*2+e.dryEnergy+40,e.daily);close(e.naturalDaily/(e.daily-40),.3);
+const low=C.energyModel({...base,activity:95}),high=C.energyModel({...base,activity:150});assert(low.k===95&&high.k===150&&high.daily>low.daily);
+const winter=C.energyModel({...base,weather:10});close(winter.daily/C.energyModel(base).daily,1.1);
+const manual=C.energyModel({...base,dayMode:'manual',manualDaily:700,weather:50,treatKcal:100});close(manual.daily,700);close(manual.portion,300);assert.equal(manual.k,null);
+assert.throws(()=>C.energyModel({...base,treatKcal:2000}),/Лакомства/);
+const early=C.energyModel({...base,stage:'pregnant',preWeight:13.2},{matingDays:20}),late=C.energyModel({...base,stage:'pregnant',preWeight:13.2},{matingDays:35});close(late.daily-early.daily,343.2);
+assert.throws(()=>C.energyModel({...base,stage:'pregnant',sex:'male',preWeight:13.2},{matingDays:35}),/Беременность/);
+assert.throws(()=>C.energyModel({...base,stage:'lactating',puppies:9,puppySolids:'no'},{litterDays:8}),/1–8/);
+assert.throws(()=>C.energyModel({...base,age:.1,ageDays:35,adultWeight:18}),/8 недель/);
+const goal=C.scaledTargets(320);assert.deepEqual(goal.kcal,[310,330]);assert.deepEqual(C.scaledTargets(640).kcal,[620,660]);assert(C.scaledTargets(640).p[0]>goal.p[0]);
+const t=C.totals([{key:'a',g:150},{key:'b',g:80},{key:'a',g:20,data:{kcal:200,p:30,f:4,c:2}}],{a:{kcal:100,p:20,f:2,c:0},b:{kcal:50,p:1,f:0,c:12}});close(t.kcal,230);close(t.p,36.8);close(t.f,3.8);close(t.c,10);
+console.log('PASS core: adult energy, allocation, treats, meals, activity, correction, manual day, reproduction/growth guards, scaling, raw weights and overrides.');

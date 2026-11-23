@@ -1,10 +1,5 @@
 <?php
 declare(strict_types=1);
-function accountMailContent(string $link,bool $reset): array {
- $heading=$reset?'Новый пароль':'Подтвердите почту';$action=$reset?'Задать новый пароль':'Подтвердить почту';$duration=$reset?'30 минут':'24 часа';
- $intro=$reset?'Откройте ссылку, чтобы восстановить доступ к вашим рецептам.':'Подтвердите адрес, чтобы входить в аккаунт и восстанавливать доступ письмом.';
- $safe=htmlspecialchars($link,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');
- $html='<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"></head><body style="margin:0;background:#f4f5f6;color:#252a32;font-family:Arial,Helvetica,sans-serif"><div style="display:none;max-height:0;overflow:hidden">'.$heading.' · Гавстрономия</div><table role="presentation" style="width:100%;border-collapse:collapse;background:#f4f5f6"><tr><td align="center" style="padding:32px 16px"><table role="presentation" style="width:100%;max-width:560px;border-collapse:collapse;background:#ffffff;border:1px solid #e2e5e9;border-radius:6px"><tr><td style="padding:28px 28px 12px;font-size:12px;letter-spacing:1.5px;color:#747c84">ГАВСТРОНОМИЯ · РАЦИОН СОБАКИ</td></tr><tr><td style="padding:10px 28px 12px;font-size:27px;line-height:1.2;font-weight:600">'.$heading.'</td></tr><tr><td style="padding:0 28px 24px;font-size:16px;line-height:1.6">'.$intro.'</td></tr><tr><td style="padding:0 28px 24px"><a href="'.$safe.'" style="display:inline-block;background:#365c4c;color:#ffffff;text-decoration:none;padding:14px 22px;border-radius:4px;font-size:16px;font-weight:600">'.$action.'</a></td></tr><tr><td style="padding:0 28px 22px;font-size:14px;line-height:1.6;color:#626c76">Ссылка действует '.$duration.' и используется один раз.<br>Если вы не запрашивали это письмо, ничего делать не нужно.</td></tr><tr><td style="padding:20px 28px;border-top:1px solid #e2e5e9;font-size:12px;line-height:1.6;color:#747c84">Если кнопка не открывается, скопируйте ссылку в браузер:<br><a href="'.$safe.'" style="color:#365c4c;word-break:break-all">'.$safe.'</a></td></tr></table></td></tr></table></body></html>';
- $text="Гавстрономия · Рацион собаки\n\n".$heading."\n\n".$intro."\n".$link."\n\nСсылка действует ".$duration." и используется один раз.\nЕсли вы не запрашивали это письмо, ничего делать не нужно.\n";
- return [$text,$html];
-}
+// Compatibility include: application code lives in app/Modules.
+if(!defined('NUTRITION_ENTRY')){http_response_code(404);exit;}
+require_once dirname(__DIR__).'/app/Modules/Auth/mail-template.php';

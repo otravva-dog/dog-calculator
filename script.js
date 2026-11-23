@@ -1,116 +1,9 @@
-const products = {
-    proteins: {
-        'turkey_breast': { name: 'Индейка (грудка)', kcal: 110, p: 23, f: 2, c: 0 },
-        'turkey_thigh': { name: 'Индейка (бедро)', kcal: 140, p: 21, f: 6, c: 0 },
-        'turkey_tenderloin': { name: 'Индейка (малое филе)', kcal: 110, p: 23, f: 2, c: 0 },
-        'turkey_indilight_thigh': { name: 'Индейка Индилайт (филе бедра)', kcal: 113, p: 19.5, f: 4, c: 0 },
-        'turkey_indilight_tenderloin': { name: 'Индейка Индилайт (малое филе)', kcal: 110, p: 23, f: 2, c: 0 },
-        'turkey_indilight_breast': { name: 'Индейка Индилайт (филе грудки)', kcal: 110, p: 23, f: 2, c: 0 },
-        'duck_breast': { name: 'Утка (грудка)', kcal: 140, p: 20, f: 7, c: 0 },
-        'duck_thigh': { name: 'Утка (бедро)', kcal: 160, p: 19, f: 9, c: 0 },
-        'beef_tenderloin': { name: 'Говядина (вырезка)', kcal: 120, p: 20, f: 3, c: 0 },
-        'beef_shoulder': { name: 'Говядина (лопатка)', kcal: 250, p: 18, f: 20, c: 0 },
-        'beef_shank': { name: 'Говядина (голяшка)', kcal: 190, p: 20, f: 11, c: 0 },
-        'rabbit': { name: 'Кролик', kcal: 150, p: 21, f: 7, c: 0 },
-        'lamb_lean': { name: 'Баранина', kcal: 210, p: 19, f: 14, c: 0 },
-        'salmon_murmansk': { name: 'Семга (Мурманская)', kcal: 205, p: 20, f: 13.5, c: 0 },
-        'salmon_generic': { name: 'Лосось', kcal: 210, p: 20, f: 14, c: 0 },
-        'sockeye': { name: 'Нерка', kcal: 160, p: 22, f: 8, c: 0 },
-        'trout': { name: 'Форель', kcal: 140, p: 21, f: 6, c: 0 },
-        'cod': { name: 'Треска', kcal: 80, p: 17, f: 1, c: 0 },
-        'hake': { name: 'Хек', kcal: 85, p: 17, f: 1, c: 0 },
-        'pollock': { name: 'Минтай', kcal: 75, p: 16, f: 1, c: 0 },
-        'sea_bass': { name: 'Морской окунь', kcal: 90, p: 18, f: 2, c: 0 }
-    },
-    mainVeggies: {
-        'broccoli_fresh': { name: 'Брокколи (свеж.)', kcal: 34, p: 2.8, f: 0.4, c: 7 },
-        'broccoli_frozen': { name: 'Брокколи (замор.)', kcal: 23, p: 2.0, f: 0.3, c: 5 },
-        'cauliflower_fresh': { name: 'Цветная (свеж.)', kcal: 30, p: 2.5, f: 0.3, c: 5 },
-        'cauliflower_frozen': { name: 'Цветная (замор.)', kcal: 20, p: 1.8, f: 0.2, c: 4 },
-        'pumpkin': { name: 'Тыква', kcal: 26, p: 1, f: 0.1, c: 7 },
-        'sweet_potato': { name: 'Батат', kcal: 86, p: 1.6, f: 0.1, c: 20 }
-    },
-    extraVeggies: {
-        'zucchini': { name: 'Цуккини', kcal: 20, p: 1.2, f: 0.3, c: 3.1 },
-        'zucchini_regular': { name: 'Кабачки', kcal: 24, p: 0.6, f: 0.1, c: 4 },
-        'carrot': { name: 'Морковь', kcal: 41, p: 0.9, f: 0.2, c: 9 },
-        'paprika': { name: 'Перец', kcal: 31, p: 1, f: 0.3, c: 6 },
-        'pepper_ramiro': { name: 'Перец Рамиро', kcal: 28, p: 1, f: 0.3, c: 5.5 },
-        'apple': { name: 'Яблоко', kcal: 52, p: 0.3, f: 0.2, c: 14 },
-        'cranberry_fresh': { name: 'Брусника (свеж.)', kcal: 43, p: 0.7, f: 0.5, c: 8 },
-        'cranberry_frozen': { name: 'Брусника (замор.)', kcal: 38, p: 0.6, f: 0.4, c: 7 },
-        'raspberry_fresh': { name: 'Малина (свеж.)', kcal: 46, p: 1.2, f: 0.7, c: 12 },
-        'raspberry_frozen': { name: 'Малина (замор.)', kcal: 40, p: 1.0, f: 0.6, c: 10 },
-        'wakame': { name: 'Вакаме', kcal: 300, p: 10, f: 1, c: 50, max_g: 5 }
-    }
-};
-const catalog={...products.proteins,...products.mainVeggies,...products.extraVeggies,
- chicken_breast:{name:'Курица, грудка без кожи',kcal:120,p:22.5,f:2.6,c:0},pork_lean:{name:'Свинина, нежирная вырезка',kcal:120,p:21,f:3.5,c:0},blueberry:{name:'Голубика',kcal:57,p:.7,f:.3,c:14.5},strawberry:{name:'Клубника',kcal:32,p:.7,f:.3,c:7.7},pear:{name:'Груша без семян',kcal:57,p:.4,f:.1,c:15},cucumber:{name:'Огурец',kcal:15,p:.7,f:.1,c:3.6},green_beans:{name:'Фасоль стручковая',kcal:31,p:1.8,f:.2,c:7},oil:{name:'Оливковое масло',kcal:900,p:0,f:100,c:0}};
-const proteinKeys=[...Object.keys(products.proteins),'chicken_breast','pork_lean'];
-const plantKeys=Object.keys(catalog).filter(k=>!proteinKeys.includes(k)&&k!=='oil');
-const LEGACY_CATALOG=structuredClone(catalog);
-const FOOD_REFERENCE={
-"turkey_breast":{"kcal": 114.0, "p": 23.34, "f": 2.33, "c": 0.0, "sourceNote": "USDA SR, NDB 05710. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"turkey_thigh":{"kcal": 116.0, "p": 20.6, "f": 3.69, "c": 0.0, "sourceNote": "USDA SR, NDB 05717. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"turkey_tenderloin":{"kcal": 114.0, "p": 23.34, "f": 2.33, "c": 0.0, "sourceNote": "USDA SR, NDB 05710. Аналог: филе грудки; уточните этикетку."},
-"beef_tenderloin":{"kcal": 138.0, "p": 20.85, "f": 6.11, "c": 0.0, "sourceNote": "USDA SR, NDB 23294. Вырезка без видимого жира, травяной откорм."},
-"beef_shoulder":{"kcal": 130.0, "p": 21.39, "f": 4.97, "c": 0.0, "sourceNote": "USDA SR, NDB 23000. Лопатка, видимый наружный жир срезан."},
-"beef_shank":{"kcal": 128.0, "p": 21.75, "f": 3.85, "c": 0.0, "sourceNote": "USDA SR, NDB 13227. Голяшка: только мясо, без кости и наружного жира."},
-"rabbit":{"kcal": 136.0, "p": 20.05, "f": 5.55, "c": 0.0, "sourceNote": "USDA SR, NDB 17177. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"lamb_lean":{"kcal": 134.0, "p": 20.29, "f": 5.25, "c": 0.0, "sourceNote": "USDA SR, NDB 17003. Нежирное мясо, видимый жир срезан."},
-"salmon_murmansk":{"kcal": 208.0, "p": 20.42, "f": 13.42, "c": 0.0, "sourceNote": "USDA SR, NDB 15236. Аналог: атлантический лосось, выращенный; происхождение не определяет жирность."},
-"salmon_generic":{"kcal": 208.0, "p": 20.42, "f": 13.42, "c": 0.0, "sourceNote": "USDA SR, NDB 15236. Атлантический лосось, выращенный."},
-"sockeye":{"kcal": 131.0, "p": 22.25, "f": 4.69, "c": 0.0, "sourceNote": "USDA SR, NDB 15085. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"trout":{"kcal": 141.0, "p": 19.94, "f": 6.18, "c": 0.0, "sourceNote": "USDA SR, NDB 15240. Радужная форель, выращенная."},
-"cod":{"kcal": 82.0, "p": 17.81, "f": 0.67, "c": 0.0, "sourceNote": "USDA SR, NDB 15015. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"pollock":{"kcal": 56.0, "p": 12.19, "f": 0.41, "c": 0.0, "sourceNote": "USDA SR, NDB 15066. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"sea_bass":{"kcal": 79.0, "p": 15.31, "f": 1.54, "c": 0.0, "sourceNote": "USDA SR, NDB 15057. Атлантический морской окунь (Sebastes), не сибас."},
-"broccoli_fresh":{"kcal": 34.0, "p": 2.82, "f": 0.37, "c": 6.64, "sourceNote": "USDA SR, NDB 11090. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"broccoli_frozen":{"kcal": 26.0, "p": 2.81, "f": 0.29, "c": 4.78, "sourceNote": "USDA SR, NDB 11092. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"cauliflower_fresh":{"kcal": 25.0, "p": 1.92, "f": 0.28, "c": 4.97, "sourceNote": "USDA SR, NDB 11135. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"cauliflower_frozen":{"kcal": 24.0, "p": 2.01, "f": 0.27, "c": 4.68, "sourceNote": "USDA SR, NDB 11137. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"pumpkin":{"kcal": 26.0, "p": 1.0, "f": 0.1, "c": 6.5, "sourceNote": "USDA SR, NDB 11422. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"sweet_potato":{"kcal": 86.0, "p": 1.57, "f": 0.05, "c": 20.12, "sourceNote": "USDA SR, NDB 11507. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"zucchini":{"kcal": 17.0, "p": 1.21, "f": 0.32, "c": 3.11, "sourceNote": "USDA SR, NDB 11477. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"zucchini_regular":{"kcal": 17.0, "p": 1.21, "f": 0.32, "c": 3.11, "sourceNote": "USDA SR, NDB 11477. Аналог: цуккини с кожицей."},
-"carrot":{"kcal": 41.0, "p": 0.93, "f": 0.24, "c": 9.58, "sourceNote": "USDA SR, NDB 11124. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"paprika":{"kcal": 31.0, "p": 0.99, "f": 0.3, "c": 6.03, "sourceNote": "USDA SR, NDB 11821. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"pepper_ramiro":{"kcal": 31.0, "p": 0.99, "f": 0.3, "c": 6.03, "sourceNote": "USDA SR, NDB 11821. Аналог: красный сладкий перец."},
-"apple":{"kcal": 52.0, "p": 0.26, "f": 0.17, "c": 13.81, "sourceNote": "USDA SR, NDB 09003. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"raspberry_fresh":{"kcal": 52.0, "p": 1.2, "f": 0.65, "c": 11.94, "sourceNote": "USDA SR, NDB 09302. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"raspberry_frozen":{"kcal": 52.0, "p": 1.2, "f": 0.65, "c": 11.94, "sourceNote": "USDA SR, NDB 09518. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"chicken_breast":{"kcal": 120.0, "p": 22.5, "f": 2.62, "c": 0.0, "sourceNote": "USDA SR, NDB 05062. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"pork_lean":{"kcal": 109.0, "p": 20.95, "f": 2.17, "c": 0.0, "sourceNote": "USDA SR, NDB 10060. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"blueberry":{"kcal": 57.0, "p": 0.74, "f": 0.33, "c": 14.49, "sourceNote": "USDA SR, NDB 09050. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"strawberry":{"kcal": 32.0, "p": 0.67, "f": 0.3, "c": 7.68, "sourceNote": "USDA SR, NDB 09316. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"pear":{"kcal": 57.0, "p": 0.36, "f": 0.14, "c": 15.23, "sourceNote": "USDA SR, NDB 09252. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"cucumber":{"kcal": 15.0, "p": 0.65, "f": 0.11, "c": 3.63, "sourceNote": "USDA SR, NDB 11205. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-"green_beans":{"kcal": 31.0, "p": 1.83, "f": 0.22, "c": 6.97, "sourceNote": "USDA SR, NDB 11052. Сырой продукт; без кожи и костей для мяса/рыбы, без сахара для заморозки."},
-};
-for(const [key,values]of Object.entries(FOOD_REFERENCE))Object.assign(catalog[key],values);
-for(const key of ['duck_breast','duck_thigh','hake','cranberry_fresh','cranberry_frozen','wakame','turkey_indilight_thigh','turkey_indilight_breast','turkey_indilight_tenderloin'])catalog[key].sourceNote='Исходные значения: точная этикетка не подтверждена. Уточните КБЖУ на упаковке.';
-catalog.wakame.name='Вакаме (сухие)';catalog.wakame.sourceNote+=' Сухие и размоченные водоросли не взаимозаменяемы.';catalog.beef_shoulder.name='Говядина (лопатка без наружного жира)';catalog.beef_shank.name='Говядина (голяшка без кости и жира)';catalog.lamb_lean.name='Баранина (нежирная)';catalog.salmon_generic.name='Лосось атлантический (выращенный)';catalog.sea_bass.name='Морской окунь (атлантический)';
-const SHORT_PRODUCT_NAMES={
- turkey_breast:'Грудка индейки',turkey_indilight_breast:'Грудка индейки',turkey_thigh:'Бедро индейки',turkey_indilight_thigh:'Бедро индейки',turkey_tenderloin:'Филе индейки',turkey_indilight_tenderloin:'Филе индейки',
- duck_breast:'Грудка утки',duck_thigh:'Бедро утки',chicken_breast:'Куриная грудка',beef_tenderloin:'Говяжья вырезка',beef_shoulder:'Говяжья лопатка',beef_shank:'Говяжья голяшка',pork_lean:'Свинина',
- salmon_murmansk:'Сёмга',salmon_generic:'Лосось',cauliflower_fresh:'Цветная капуста',cauliflower_frozen:'Цветная капуста',pear:'Груша'
-};
 function shortProductName(key){return SHORT_PRODUCT_NAMES[key]||catalog[key].name.replace(/\s*\([^)]*\)/gu,'').replace(/\s+/gu,' ').trim();}
 function snapshotRecipe(record){if(record.state.foodSchema!==6){record.state.rows.forEach(row=>{if(!row.data)row.data=Object.fromEntries(['kcal','p','f','c'].map(k=>[k,LEGACY_CATALOG[row.key][k]]));});record.state.foodSchema=6;}return record;}
-const PRODUCT_GROUPS=[
- ['Индейка',proteinKeys.filter(k=>k.startsWith('turkey'))],['Утка',proteinKeys.filter(k=>k.startsWith('duck'))],['Курица',['chicken_breast']],['Мясо',['beef_tenderloin','beef_shoulder','beef_shank','rabbit','lamb_lean','pork_lean']],['Лососёвые',['salmon_murmansk','salmon_generic','sockeye','trout']],['Белая рыба',['cod','hake','pollock','sea_bass']],
- ['Овощи · капустные',['broccoli_fresh','broccoli_frozen','cauliflower_fresh','cauliflower_frozen']],['Овощи · тыквенные',['pumpkin','zucchini','zucchini_regular','cucumber']],['Овощи · корнеплоды',['carrot','sweet_potato']],['Овощи · перец и фасоль',['paprika','pepper_ramiro','green_beans']],['Фрукты',['apple','pear']],['Ягоды',['blueberry','strawberry','cranberry_fresh','cranberry_frozen','raspberry_fresh','raspberry_frozen']],['Водоросли · ручной подбор',['wakame']],['Масло',['oil']]];
-const BREED_GROUPS=[['Небольшие · обычно до 10 кг',['Чихуахуа','Померанский шпиц','Йоркширский терьер','Русский той','Мальтезе','Бишон фризе','Карликовый пудель','Папильон','Пекинес','Мопс','Джек-рассел-терьер','Такса']],['Средние · обычно 10–25 кг',['Русский охотничий спаниель','Английский кокер-спаниель','Американский кокер-спаниель','Бигль','Вельш-корги пемброк','Вельш-корги кардиган','Французский бульдог','Сиба-ину','Бордер-колли','Стаффордширский бультерьер']],['Крупные · обычно 25–45 кг',['Лабрадор-ретривер','Золотистый ретривер','Немецкая овчарка','Восточноевропейская овчарка','Бельгийская овчарка малинуа','Сибирский хаски','Самоед','Акита-ину','Американский стаффордширский терьер','Доберман','Ротвейлер','Далматин','Курцхаар','Дратхаар','Русская псовая борзая']],['Очень крупные · обычно от 45 кг',['Кане-корсо','Среднеазиатская овчарка','Кавказская овчарка','Немецкий дог','Сенбернар','Ньюфаундленд','Бернский зенненхунд']],['Другие',['Метис','Другая порода']]];
-
 'use strict';
 const $=id=>document.getElementById(id),keys=['kcal','p','f','c'],labels={kcal:'Ккал',p:'Белок',f:'Жир',c:'Углеводы'};
 const uid=()=>globalThis.crypto?.randomUUID?.()||`r-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-const REFERENCE={kcal:277.5,p:[22,33],f:[9,22]};
-const round1=n=>Math.round(n*10)/10;
-function scaledTargets(center=320){const factor=center/REFERENCE.kcal,kcal=[Math.round(center*310/320),Math.round(center*330/320)],p=REFERENCE.p.map(x=>Math.round(x*factor)),f=REFERENCE.f.map(x=>Math.round(x*factor));return {kcal,p,f,c:[Math.max(0,Math.floor((kcal[0]-4*p[1]-9*f[1])/4)),Math.max(0,Math.ceil((kcal[1]-4*p[0]-9*f[0])/4))]};}
-const initialTargets=()=>scaledTargets(320);
-const MACRO_ENERGY={p:27.5*4/277.5,f:15.5*9/277.5,c:(277.5-27.5*4-15.5*9)/277.5};
-const macroProfile=kcal=>({kcal,p:kcal*MACRO_ENERGY.p/4,f:kcal*MACRO_ENERGY.f/9,c:kcal*MACRO_ENERGY.c/4});
+const REFERENCE=NutritionCore.REFERENCE,round1=NutritionCore.round1,scaledTargets=NutritionCore.scaledTargets,initialTargets=()=>scaledTargets(320),macroProfile=NutritionCore.macroProfile;
 const defaultState=()=>({targetMode:'profile',targets:initialTargets(),rows:[{key:'turkey_thigh',g:100,locked:false},{key:'pumpkin',g:100,locked:false},{key:'zucchini',g:80,locked:false},{key:'oil',g:5,locked:false}],batch:1,profile:{},thickness:30,targetSchema:5});
 let state=defaultState(),recipes=[],activeId=null,openedRecord=null,openedBaseline=null,customName=false,cloudReady=false,cloudBusy=false,localOK=true,apiMode='rest',csrfToken=null,authMode='login';
 const valid=s=>!!s&&Array.isArray(s.rows)&&s.rows.length<=40&&s.rows.every(r=>Object.hasOwn(catalog,r.key)&&Number.isFinite(r.g)&&r.g>=0&&r.g<=10000&&(!r.data||keys.every(k=>Number.isFinite(r.data[k])&&r.data[k]>=0&&r.data[k]<=1000)))&&s.targets&&keys.every(k=>Array.isArray(s.targets[k])&&s.targets[k].length===2&&s.targets[k].every(n=>n===null||Number.isFinite(n)&&n>=0&&n<=10000))&&Number.isInteger(s.batch)&&s.batch>=1&&s.batch<=100&&(!s.profile||typeof s.profile==='object')&&(!s.thickness||[10,15,20,25,30].includes(s.thickness));
@@ -120,7 +13,7 @@ try{const raw=JSON.parse(localStorage.getItem('nutrition_v3')||'null');if(valid(
 if(state.targetSchema!==5){state.targets=initialTargets();state.targetSchema=5;}
 if(!state.targetMode||state.targetMode==='manual'&&!state.targetLinkSchema&&(['kcal','p','f'].every(k=>JSON.stringify(state.targets[k])===JSON.stringify(initialTargets()[k]))&&state.targets.c.every(v=>v===null)))state.targetMode='profile';state.targetLinkSchema=25;
 const data=r=>r.data||catalog[r.key];
-function totals(rows=state.rows){return rows.reduce((a,r)=>{keys.forEach(k=>a[k]+=data(r)[k]*r.g/100);return a;},{kcal:0,p:0,f:0,c:0});}
+function totals(rows=state.rows){return NutritionCore.totals(rows,catalog);}
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function number(value,min=0,step=1){const n=el('input');n.type='number';n.min=min;n.step=step;n.value=value??'';return n;}
 function makeLabel(text,input){const n=el('label',text);n.append(input);return n;}
@@ -133,7 +26,7 @@ $('saveRecipe').textContent=activeId?'Сохранить как новый':'С�
 $('recipeContext').textContent=activeId?`Открыт «${cleanName(current.name)}». Исходный рецепт изменится только по кнопке «Сохранить изменения».`:'';
 $('addOil').disabled=state.rows.some(r=>r.key==='oil');$('addOil').hidden=$('addOil').disabled;$('addAlgae').hidden=state.rows.some(r=>r.key==='wakame');$('extrasMenu').hidden=$('addOil').hidden&&$('addAlgae').hidden;}
 function notice(text){$('fitMessage').textContent=text;}
-function persist(){state.autoName=!customName;try{localStorage.setItem('nutrition_v3',JSON.stringify({state,customName,name:$('recipeName').value}));localStorage.setItem('nutrition_recipes_v3',JSON.stringify(recipes.filter(r=>r.origin!=='cloud')));}catch{localOK=false;}$('storageStatus').textContent=cloudBusy?'Синхронизация…':cloudReady?'Сохранение в облако':localOK?'На этом устройстве':'Хранилище недоступно — сделайте экспорт';}
+function persist(){state.autoName=!customName;try{localStorage.setItem(NutritionDogs.storageKey('nutrition_v3'),JSON.stringify({state,customName,name:$('recipeName').value}));localStorage.setItem(NutritionDogs.storageKey('nutrition_recipes_v3'),JSON.stringify(recipes.filter(r=>r.origin!=='cloud')));}catch{localOK=false;}$('storageStatus').textContent=cloudBusy?'Синхронизация…':cloudReady?'Сохранение в облако':localOK?'На этом устройстве':'Хранилище недоступно — сделайте экспорт';}
 function targetError(){return keys.some(k=>{const [lo,hi]=state.targets[k];return(k!=='c'&&(lo===null||hi===null))||(lo!==null&&hi!==null&&lo>hi);});}
 function syncMacroTargetsFromCalories(){const [lo,hi]=state.targets.kcal;if(lo===null||hi===null||!Number.isFinite(lo)||!Number.isFinite(hi)||lo>hi)return;const suggested=scaledTargets((lo+hi)/2);for(const key of ['p','f','c']){state.targets[key]=suggested[key];state.targets[key].forEach((value,index)=>{const field=document.querySelector(`[data-target="${key}-${index}"]`);if(field)field.value=value;});}}
 function renderTargets(){$('targets').replaceChildren();keys.forEach(k=>{const box=el('section',undefined,'target-item'),range=el('div',undefined,'target-inputs'),head=el('div',undefined,'target-heading'),title=el('h3',k==='f'?'Жиры':labels[k],'target-title');title.id='targetHeading-'+k;box.setAttribute('aria-labelledby',title.id);head.append(title);if(k!=='kcal')head.append(el('span','г','target-unit'));box.append(head);[0,1].forEach(i=>{if(i)range.append(el('span','–'));const n=number(state.targets[k][i],0,1);n.max=10000;n.placeholder='—';n.setAttribute('aria-label',`${labels[k]} ${i?'максимум':'минимум'}`);n.dataset.target=`${k}-${i}`;n.oninput=()=>{markManualTargets();if(n.value!==''&&(!Number.isFinite(n.valueAsNumber)||n.valueAsNumber<0||n.valueAsNumber>10000))return;state.targets[k][i]=n.value===''?null:n.valueAsNumber;if(k==='kcal')syncMacroTargetsFromCalories();update();};n.onchange=()=>{if(n.value!==''&&Number.isFinite(n.valueAsNumber)){state.targets[k][i]=Math.round(n.valueAsNumber);n.value=state.targets[k][i];if(k==='kcal')syncMacroTargetsFromCalories();update();}};range.append(n);});box.append(range);$('targets').append(box);});}
@@ -176,7 +69,7 @@ function renderRecipes(){$('recipes').replaceChildren();$('recipes').className='
 function loadRecipe(id){if(cloudBusy){notice('Дождитесь завершения сохранения.');return;}const r=recipes.find(x=>x.id===id);if(!r)return;const loaded=structuredClone(r.state);state.rows=loaded.rows;state.rows.forEach(row=>row.g=quantize(row,row.g));state.batch=loaded.batch;state.thickness=loaded.thickness||10;activeId=r.id;openedRecord=structuredClone(r);customName=true;$('recipeName').value=cleanName(r.name);openedBaseline=recipeFingerprint(state,$('recipeName').value);renderRows();applyProfile();update();renderRecipes();notice('');}
 async function saveRecipe(mode='new',newName=null){if(state.targetMode==='profile'&&(!lastEnergyModel||+$('share').value===0)){notice('Проверьте профиль или выберите ручные цели.');return;}if(!valid(state)||targetError()){notice('Проверьте значения перед сохранением.');return;}if(!state.rows.some(r=>r.g>0)||totals().kcal<=0){notice('Добавьте продукты с положительным весом.');return;}if(cloudBusy)return;const updating=mode==='update',old=updating?openedRecord:null;if(updating&&(!old||!activeId)){notice('Сначала откройте рецепт из списка.');return;}if(!updating&&newName===null){$('newRecipeName').value=activeId?recipeTitle():(cleanName($('recipeName').value)||recipeTitle());$('newRecipeStatus').textContent='';$('newRecipeDialog').showModal();$('newRecipeName').select();return;}const name=cleanName(updating?$('recipeName').value:newName)||recipeTitle(),fingerprint=recipeFingerprint(state,name);
 if(!updating&&recipes.some(r=>recipeFingerprint(r.state,r.name)===fingerprint)){notice('Такой рецепт уже сохранён. Измените состав, граммы или название для нового варианта.');return;}
-const recipeState=structuredClone(state);recipeState.autoName=false;recipeState.foodSchema=6;recipeState.rows.forEach(row=>{row.data=Object.fromEntries(keys.map(k=>[k,data(row)[k]]));});const recipe={id:updating?activeId:uid(),name,state:recipeState,updatedAt:new Date().toISOString(),origin:'local'};if(updating&&old.revision)recipe.revision=old.revision;
+const recipeState=structuredClone(state);recipeState.autoName=false;recipeState.foodSchema=6;recipeState.calculationVersion=NutritionCore.VERSION;recipeState.rows.forEach(row=>{row.data=Object.fromEntries(keys.map(k=>[k,data(row)[k]]));});const recipe={id:updating?activeId:uid(),name,state:recipeState,updatedAt:new Date().toISOString(),origin:'local'};if(updating&&old.revision)recipe.revision=old.revision;
 if(cloudReady){cloudBusy=true;syncRecipeActions();persist();try{const saved=await cloudRequest('/api/recipes/'+encodeURIComponent(recipe.id),{method:'PUT',body:JSON.stringify(recipe)});recipe.revision=saved.revision;recipe.updatedAt=saved.updatedAt||recipe.updatedAt;recipe.origin='cloud';}catch(e){cloudBusy=false;syncRecipeActions();persist();notice(e.status===409?'Рецепт изменён на другом устройстве. Откройте свежую версию после синхронизации или сохраните новый рецепт.':'Не удалось сохранить в облако. Черновик остаётся на устройстве; повторите сохранение.');return;}cloudBusy=false;}
 const index=recipes.findIndex(r=>r.id===recipe.id);if(index>=0)recipes[index]=recipe;else recipes.unshift(recipe);
 customName=true;$('recipeName').value=name;if(updating){openedRecord=structuredClone(recipe);openedBaseline=fingerprint;}else{activeId=null;openedRecord=null;openedBaseline=null;}
@@ -186,15 +79,15 @@ $('closeNewRecipe').onclick=()=>{if(!cloudBusy)$('newRecipeDialog').close();};$(
 async function removeRecipe(id){const r=recipes.find(x=>x.id===id);if(!r||!confirm(`Удалить «${r.name}»?`))return;if(cloudBusy)return;if(r.origin==='cloud'){if(!cloudReady){notice('Для удаления облачного рецепта нужен вход.');return;}try{await cloudRequest('/api/recipes/'+encodeURIComponent(id),{method:'DELETE',headers:{'If-Match':r.revision||''}});}catch(e){notice(e.status===409?'Рецепт изменён на другом устройстве. Синхронизируйте.':'Удалить не удалось.');return;}}recipes=recipes.filter(x=>x.id!==id);if(activeId===id){activeId=null;openedRecord=null;openedBaseline=null;}renderRecipes();update();}
 $('export').onclick=()=>{const blob=new Blob([JSON.stringify({version:3,state,recipes},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=el('a');a.href=url;a.download='nutrition-recipes.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 $('import').onchange=async e=>{if(cloudBusy){e.target.value='';return;}try{const file=e.target.files[0];if(!file)return;if(file.size>2000000)throw Error();const v=JSON.parse(await file.text());if(![2,3].includes(v.version)||!valid(v.state)||!Array.isArray(v.recipes)||v.recipes.length>500||!v.recipes.every(r=>typeof r.name==='string'&&r.name.length<=100&&valid(r.state)))throw Error();state.rows=structuredClone(v.state.rows);state.batch=v.state.batch;state.thickness=v.state.thickness||10;state.rows.forEach(r=>r.g=quantize(r,r.g));activeId=null;openedRecord=null;openedBaseline=null;customName=false;const added=v.recipes.map(r=>snapshotRecipe({id:uid(),name:r.name,state:r.state,origin:'local',updatedAt:new Date().toISOString()}));recipes=[...added,...recipes];renderTargets();renderRows();applyProfile();update();renderRecipes();notice('Импортировано на устройство. Откройте рецепт и сохраните в облако.');}catch{notice('Нужен корректный JSON-экспорт до 2 МБ.');}e.target.value='';};
-async function cloudRequest(path,options={}){const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),15000);try{const headers={'Content-Type':'application/json',...(csrfToken?{'X-CSRF-Token':csrfToken}:{}),...(options.headers||{})};let endpoint=path;if(apiMode==='php'){const url=new URL('api/index.php',document.baseURI);url.searchParams.set('path',path.replace(/^\/api\//,''));endpoint=url.href;}const response=await fetch(endpoint,{credentials:'same-origin',...options,headers,signal:controller.signal});if(!response.ok){let msg='Ошибка сервера';try{msg=(await response.json()).error||msg;}catch{}const e=Error(msg);e.status=response.status;throw e;}return response.status===204?null:await response.json();}finally{clearTimeout(timeout);}}
+async function cloudRequest(path,options={}){const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),15000);try{const headers={'Content-Type':'application/json',...(csrfToken?{'X-CSRF-Token':csrfToken}:{}),...(NutritionDogs.enabled&&NutritionDogs.activeId?{'X-Nutrition-Dog':NutritionDogs.activeId}:{}),...(options.headers||{})};let endpoint=path;if(apiMode==='php'){const url=new URL('api/index.php',document.baseURI);url.searchParams.set('path',path.replace(/^\/api\//,''));endpoint=url.href;}const response=await fetch(endpoint,{credentials:'same-origin',...options,headers,signal:controller.signal});if(!response.ok){let msg='Ошибка сервера';try{msg=(await response.json()).error||msg;}catch{}const e=Error(msg);e.status=response.status;throw e;}return response.status===204?null:await response.json();}finally{clearTimeout(timeout);}}
 async function refreshCloud(){if(!cloudReady||cloudBusy)return;cloudBusy=true;persist();try{const result=await cloudRequest('/api/recipes');if(!Array.isArray(result.recipes)||!result.recipes.every(r=>typeof r.name==='string'&&valid(r.state)))throw Error();const local=recipes.filter(r=>r.origin!=='cloud');const cloud=result.recipes.map(r=>snapshotRecipe({...r,origin:'cloud'}));recipes=[...cloud,...local.filter(r=>!cloud.some(c=>c.id===r.id))];renderRecipes();$('libraryStatus').textContent='Рецепты синхронизированы.';}catch{$('libraryStatus').textContent='Не удалось загрузить облачные рецепты. Повторите синхронизацию.';}finally{cloudBusy=false;syncRecipeActions();persist();}}
 function accountNotice(text){$('accountMessage').textContent=text;$('accountMessage').hidden=false;}
 function setAuthMode(mode){authMode=mode;const login=mode==='login',register=mode==='register',forgot=mode==='forgot',reset=mode==='reset',bind=mode==='email',change=mode==='password';$('authTitle').textContent=register?'Регистрация':forgot?'Восстановить пароль':reset?'Новый пароль':bind?'Привязать почту':change?'Сменить пароль':'Вход';$('authSubmit').textContent=register?'Создать аккаунт':forgot?'Отправить ссылку':reset||change?'Сохранить пароль':bind?'Подтвердить почту':'Войти';$('authTabs').hidden=reset||bind||change;$('resetHelp').hidden=!reset;$('usernameLabel').hidden=reset||bind||change;$('authUsername').disabled=reset||bind||change;$('authUsername').required=login||register||forgot;$('authUsername').maxLength=254;$('authUsername').removeAttribute('pattern');$('authUsername').type=login?'text':'email';$('authUsername').autocomplete=login?'username':'email';$('authUsername').placeholder=login?'Email или прежний логин':'name@example.ru';$('usernameText').textContent=login?'Email или прежний логин':'Email';$('passwordLabel').hidden=forgot;$('authPassword').disabled=forgot;$('authPassword').required=!forgot;$('authPassword').minLength=register||reset||change?15:1;$('authPassword').placeholder=register||reset||change?'Не менее 15 символов':bind?'Текущий пароль':'';$('authPassword').autocomplete=login||bind?'current-password':'new-password';$('passwordText').textContent=bind?'Текущий пароль':reset||change?'Новый пароль':'Пароль';$('currentPasswordLabel').hidden=!change;$('authCurrentPassword').disabled=!change;$('authCurrentPassword').required=change;$('confirmLabel').hidden=!(register||reset||change);$('authConfirm').disabled=!(register||reset||change);$('authConfirm').required=register||reset||change;$('emailLabel').hidden=!bind;$('authEmail').disabled=!bind;$('authEmail').required=bind;$('authMessage').textContent='';$('authHint').textContent=register?'Подтвердите почту по ссылке в письме.':forgot?'Укажите почту регистрации или подтверждённый адрес аккаунта.':bind?'Войдите по старому логину, привяжите и подтвердите email — рецепты сохранятся.':'';}
 function openAuth(mode){setAuthMode(mode);if(!$('authDialog').open)$('authDialog').showModal();}
 let resetToken=null;
 $('passwordSignIn').onclick=()=>openAuth('login');$('changePassword').onclick=()=>openAuth('password');$('manageEmail').onclick=()=>openAuth('email');$('closeAuth').onclick=()=>$('authDialog').close();$('authDialog').addEventListener('close',()=>{for(const id of ['authPassword','authConfirm','authCurrentPassword'])$(id).value='';resetToken=null;});document.querySelectorAll('[data-auth-mode]').forEach(button=>button.onclick=()=>{resetToken=null;setAuthMode(button.dataset.authMode);});
-$('authForm').onsubmit=async event=>{event.preventDefault();const mode=authMode;if(['register','reset','password'].includes(mode)&&$('authPassword').value!==$('authConfirm').value){$('authMessage').textContent='Пароли не совпадают.';return;}$('authSubmit').disabled=true;try{const body=mode==='forgot'?{email:$('authUsername').value}:mode==='reset'?{token:resetToken,password:$('authPassword').value}:mode==='email'?{email:$('authEmail').value,password:$('authPassword').value}:mode==='password'?{currentPassword:$('authCurrentPassword').value,password:$('authPassword').value}:{username:$('authUsername').value,password:$('authPassword').value};const result=await cloudRequest('/api/auth/'+mode,{method:'POST',body:JSON.stringify(body)});if(result.csrf)csrfToken=result.csrf;for(const id of ['authPassword','authConfirm','authCurrentPassword'])$(id).value='';if(mode==='forgot'||mode==='email'){$('authMessage').textContent=result.message;return;}if(mode==='reset'){resetToken=null;recipes=recipes.filter(r=>r.origin!=='cloud');state=defaultState();resetAccountPreferences();activeId=null;openedRecord=null;openedBaseline=null;customName=false;renderTargets();renderRows();applyProfile();update();renderRecipes();await initCloud();setAuthMode('login');$('authMessage').textContent=result.message;return;}await initCloud();$('authDialog').close();if(mode==='register')accountNotice(result.verificationSent?'Аккаунт создан. Проверьте почту.':'Аккаунт создан. Письмо не отправлено; повторите через «Подтвердить почту».');if(mode==='password')notice('Пароль изменён.');}catch(e){$('authMessage').textContent=e.message;}finally{$('authSubmit').disabled=false;}};
-$('signOut').onclick=async()=>{try{await cloudRequest('/api/auth/logout',{method:'POST',body:'{}'});cloudReady=false;csrfToken=null;recipes=recipes.filter(r=>r.origin!=='cloud');state=defaultState();resetAccountPreferences();activeId=null;openedRecord=null;openedBaseline=null;customName=false;$('signOut').hidden=true;$('changePassword').hidden=true;$('manageEmail').hidden=true;renderTargets();renderRows();applyProfile();update();renderRecipes();await initCloud();}catch{notice('Выйти не удалось. Повторите.');}};
+$('authForm').onsubmit=async event=>{event.preventDefault();const mode=authMode;if(['register','reset','password'].includes(mode)&&$('authPassword').value!==$('authConfirm').value){$('authMessage').textContent='Пароли не совпадают.';return;}$('authSubmit').disabled=true;try{const body=mode==='forgot'?{email:$('authUsername').value}:mode==='reset'?{token:resetToken,password:$('authPassword').value}:mode==='email'?{email:$('authEmail').value,password:$('authPassword').value}:mode==='password'?{currentPassword:$('authCurrentPassword').value,password:$('authPassword').value}:{username:$('authUsername').value,password:$('authPassword').value};const result=await cloudRequest('/api/auth/'+mode,{method:'POST',body:JSON.stringify(body)});if(result.csrf)csrfToken=result.csrf;for(const id of ['authPassword','authConfirm','authCurrentPassword'])$(id).value='';if(mode==='forgot'||mode==='email'){$('authMessage').textContent=result.message;return;}if(mode==='reset'){NutritionDogs.stash();NutritionDogs.reset();resetToken=null;recipes=recipes.filter(r=>r.origin!=='cloud');state=defaultState();resetAccountPreferences();activeId=null;openedRecord=null;openedBaseline=null;customName=false;renderTargets();renderRows();applyProfile();update();renderRecipes();await initCloud();setAuthMode('login');$('authMessage').textContent=result.message;return;}await initCloud();$('authDialog').close();if(mode==='register')accountNotice(result.verificationSent?'Аккаунт создан. Проверьте почту.':'Аккаунт создан. Письмо не отправлено; повторите через «Подтвердить почту».');if(mode==='password')notice('Пароль изменён.');}catch(e){$('authMessage').textContent=e.message;}finally{$('authSubmit').disabled=false;}};
+$('signOut').onclick=async()=>{try{await cloudRequest('/api/auth/logout',{method:'POST',body:'{}'});NutritionDogs.stash();NutritionDogs.reset();cloudReady=false;csrfToken=null;recipes=recipes.filter(r=>r.origin!=='cloud');state=defaultState();resetAccountPreferences();activeId=null;openedRecord=null;openedBaseline=null;customName=false;$('signOut').hidden=true;$('changePassword').hidden=true;$('manageEmail').hidden=true;renderTargets();renderRows();applyProfile();update();renderRecipes();await initCloud();}catch{notice('Выйти не удалось. Повторите.');}};
 async function handleAccountLink(){const hash=location.hash;if(!/^#(?:reset|verify)=/.test(hash))return;history.replaceState(null,'',location.pathname+location.search);const match=hash.match(/^#(reset|verify)=([a-f0-9]{64})$/);if(!match){accountNotice('Ссылка недействительна. Запросите новую.');return;}if(!csrfToken){accountNotice('Для этой ссылки нужен сайт с подключённым сервером.');return;}if(match[1]==='reset'){resetToken=match[2];openAuth('reset');return;}try{const result=await cloudRequest('/api/auth/verify-email',{method:'POST',body:JSON.stringify({token:match[2]})});await initCloud();accountNotice(result.message);}catch(e){accountNotice(e.message);}}
 $('refreshCloud').onclick=refreshCloud;
 
@@ -213,38 +106,8 @@ function calendarAge(value,today=localDateValue()){
  const completeYears=ty-y-((tm<m||tm===m&&td<d)?1:0),anniversary=Date.UTC(y+completeYears,m-1,d),next=Date.UTC(y+completeYears+1,m-1,d),years=completeYears+(Date.UTC(ty,tm-1,td)-anniversary)/(next-anniversary);return {years,days,months,text:months>=12?`${Math.floor(months/12)} г. ${months%12} мес.`:months>0?`${months} мес.`:`${days} дн.`};
 }
 function elapsedDays(value,today=localDateValue()){value=value?.includes('.')?parsePreparationDate(value):value;if(!value||!validPreparationDate(value)||value>today)return null;return Math.floor((Date.parse(today+'T12:00:00Z')-Date.parse(value+'T12:00:00Z'))/86400000);}
-function energyModel(p){
- const metabolic=p.weight**.75,rer=70*metabolic;let k=110,description='',base,daily;
- if(p.dayMode==='manual'){base=p.manualDaily;k=null;description='Своя суточная норма';}
- else if(p.stage==='pregnant'){
-  if(p.age<1)throw Error('Для растущей беременной собаки нужен индивидуальный расчёт рациона.');
-  if(p.sex!=='female'||p.neutered!=='intact')throw Error('Беременность доступна для нестерилизованной суки.');
-  const day=elapsedDays(p.matingDate);if(day===null||day>70)throw Error('Проверьте дату вязки: нужен текущий срок беременности.');
-  if(!(p.preWeight>0))throw Error('Укажите вес до беременности.');
-  base=132*p.preWeight**.75+(day>=28?26*p.preWeight:0);k=null;description=`FEDIAF · беременность · ${day+1}-й день`;
- }else if(p.stage==='lactating'){
-  if(p.age<1)throw Error('Для растущей кормящей собаки нужен индивидуальный расчёт рациона.');
-  if(p.sex!=='female'||p.neutered!=='intact')throw Error('Лактация доступна для нестерилизованной суки.');
-  if(p.puppySolids==='yes')throw Error('При прикорме щенков укажите индивидуальную суточную норму.');const day=elapsedDays(p.birthLitterDate);if(day===null)throw Error('Укажите дату родов.');
-  if(day>27)throw Error('После 4-й недели лактации потребность зависит от прикорма и отъёма. Используйте индивидуальные цели.');
-  if(!Number.isInteger(p.puppies)||p.puppies<1||p.puppies>8)throw Error('Формула FEDIAF рассчитана на 1–8 кормящихся щенков. Для большего помёта нужны индивидуальные цели.');
-  const L=[.75,.95,1.1,1.2][Math.floor(day/7)],n=p.puppies,milk=n<=4?24*n:96+12*(n-4);
-  base=145*metabolic+milk*p.weight*L;k=null;description=`FEDIAF · лактация · ${Math.floor(day/7)+1}-я неделя · ${n} щенков`;
- }else if(p.age<1){
-  if(p.ageDays<56)throw Error('До 8 недель этот калькулятор не рассчитывает рацион щенка.');
-  if(!(p.adultWeight>=p.weight))throw Error('Укажите ожидаемый взрослый вес не меньше текущего.');
-  k=254.1-135*(p.weight/p.adultWeight);base=k*metabolic;description='FEDIAF · рост с 8 недель до 1 года';
- }else{
-  if(p.method==='fediaf-age'){k=p.age<3?130:p.age<=7?110:95;description='FEDIAF · возрастной ориентир';}
-  else if(p.method==='nrc-wsava'){k=p.activity===95?95:130;description='NRC / WSAVA · '+(k===95?'низкая активность':'активная взрослая');}
-  else if(p.method==='rer-state'){k=70*(p.neutered==='neutered'?1.6:1.8);description='MER по RER · '+(p.neutered==='neutered'?'1,6 × RER':'1,8 × RER');}
-  else if(p.method==='custom'){k=p.customK;description='Индивидуальный коэффициент';}
-  else {k=p.activity;description='FEDIAF · активность';}
-  base=k*metabolic;
- }
- daily=p.dayMode==='manual'?p.manualDaily:base*(1+p.weather/100);const budget=daily-(Number(p.treatKcal)||0);if(budget<0)throw Error('Лакомства превышают цель на день.');const naturalDaily=budget*p.share/100,portion=naturalDaily/(p.homeMeals||1),dryEnergy=budget-naturalDaily;
- return {daily,rer,portion,naturalDaily,dryEnergy,budget,k,base,description,dayMacros:macroProfile(daily),portionMacros:macroProfile(portion),stage:p.stage,age:p.age};
-}
+function energyModel(p){return NutritionCore.energyModel(p,{matingDays:elapsedDays(p.matingDate),litterDays:elapsedDays(p.birthLitterDate)});}
+
 const PROFILE_ZERO_FIELDS=new Set(['weather','treatKcal']);
 const PROFILE_FIELD_NAMES={dogWeight:'Вес собаки, кг',share:'Доля натурального кормления, %',homeMeals:'Натуральных кормлений в день',weather:'Индивидуальная корректировка, %',treatKcal:'Лакомства, ккал в сутки',manualDaily:'Своя суточная норма, ккал',customK:'Свой коэффициент k'};
 function restoreProfileField(id,value){const input=$(id);if(input.type!=='number'){input.value=value;return;}input.setCustomValidity('');let text=String(value??'').trim();if(PROFILE_ZERO_FIELDS.has(id)&&text==='')text='0';if(/^[+-]?\d+,\d+$/.test(text))text=text.replace(',','.');input.value=text;if(text!==''&&(!Number.isFinite(Number(text))||input.value===''))input.setCustomValidity('Проверьте сохранённое числовое значение.');}
@@ -329,11 +192,7 @@ $('targetMode').onchange=()=>{state.targetMode=$('targetMode').value;profileTarg
 $('applyEstimate').onclick=()=>{if(estimate()===null||+$('share').value===0)return;state.targetMode='profile';$('targetMode').value='profile';profileTargetUpdate();update();queueProfileSave();};
 
 // FEDIAF 2025 table III-3b, per 1000 kcal. Values are reference levels, not supplement prescriptions.
-const MICRO_META=[
- ['ca','Кальций','г',1.45,1.25,2.5,6.25],['p','Фосфор','г',1.16,1,2.25,4],['mg','Магний','г',.20,.18,.10],['k','Калий','г',1.45,1.25,1.10],['na','Натрий','г',.29,.25,.55],
- ['fe','Железо','мг',10.4,9,22],['zn','Цинк','мг',20.8,18,25],['cu','Медь','мг',2.08,1.8,2.75],['mn','Марганец','мг',1.67,1.44,1.4],['se','Селен','мкг',67.5,57.5,100],['i','Йод','мкг',300,260,380],
- ['a','A · ретинол','МЕ',1754,1515,1250,100000],['d','D','МЕ',159,138,138,800],['e','E','МЕ',10.4,9,12.5],['b1','B1','мг',.62,.54,.45],['b2','B2','мг',1.74,1.5,1.05],['b3','B3','мг',4.74,4.09,3.4],['b5','B5','мг',4.11,3.55,3],['b6','B6','мг',.42,.36,.30],['b9','B9 · фолат','мкг',74.7,64.5,54],['b12','B12','мкг',9.68,8.36,7],['choline','Холин','мг',474,409,425]
-];
+const MICRO_META=MICRO_DEFINITIONS;
 function microDefaults(){return {dryBasis:'100',dryValues:{},supplements:[],foodOverrides:{}};}
 let microPlan=microDefaults();try{const saved=JSON.parse(localStorage.getItem('nutrition_micro_v1')||'null');if(validMicroPlan(saved))microPlan=saved;}catch{}
 function validMicroValues(values){return values&&typeof values==='object'&&!Array.isArray(values)&&Object.entries(values).every(([k,v])=>MICRO_META.some(n=>n[0]===k)&&(v===null||Number.isFinite(v)&&v>=0&&v<=1e8));}
@@ -464,34 +323,9 @@ function renderCooking(){
  $('cookPlan').append(preparationMode==='batch'?batchCards(state):packetCards(state));equalizePreparationCards($('cookPlan'));
 }
 document.querySelectorAll('[data-preparation-mode]').forEach((button,index,buttons)=>{button.onclick=()=>{preparationMode=button.dataset.preparationMode;try{localStorage.setItem('nutrition_preparation_mode',preparationMode);}catch{}renderCooking();};button.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const n=event.key==='Home'?0:event.key==='End'?buttons.length-1:(index+(event.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;buttons[n].focus();buttons[n].click();}};});
-function splitPrintedPackets(root){for(const card of [...root.children]){const list=card.querySelector('.packet-ingredients');if(!list||list.children.length<=4)continue;const rows=[...list.children],next=card.nextSibling;list.replaceChildren(...rows.slice(0,4));for(let index=4;index<rows.length;index+=4){const clone=card.cloneNode(true);clone.querySelector('.packet-ingredients').replaceChildren(...rows.slice(index,index+4));clone.querySelector('.prep-name').append(document.createTextNode(' · продолжение'));root.insertBefore(clone,next);}}}
-function printHalf(recipeState,name,date,kind){
- const half=el('section',undefined,'print-half print-half-'+kind),head=el('div',undefined,'print-half-header'),title=el('div',undefined,'print-title-row');title.append(el('h1',name),el('span',displayPreparationDate(date),'print-date'));head.append(title);
- const subtitle=el('div',undefined,'print-stage-heading');subtitle.append(el('h2',kind==='batch'?'Подготовка партии':'Фасовка пакетов','print-stage-title'),el('strong',kind==='batch'?preparationBatch(recipeState):'1 порция','print-stage-amount'));head.append(subtitle);half.append(head);
- const stage=el('div',undefined,'print-stage '+(kind==='batch'?'print-batch-stage':'print-packet-stage'));const cards=kind==='batch'?batchCards(recipeState):packetCards(recipeState);if(kind==='portion')splitPrintedPackets(cards);stage.append(cards);half.append(stage);
- return half;
-}
-function ensureRecipePageRule(){let rule=$('recipePageRule');if(!rule){rule=el('style');rule.id='recipePageRule';rule.media='print';document.head.append(rule);}rule.textContent='@page { size: A4 portrait; margin: 8mm; }';}
-function removeRecipePageRule(){$('recipePageRule')?.remove();}
-$('printLabelSheet').addEventListener('click',removeRecipePageRule,{capture:true});
-function printRecipe(saved=null){
- const recipeState=saved?.state||state,date=preparedDate();if(!date)return;if(!recipeState.rows.some(r=>r.g>0)){notice('Добавьте продукты для печати.');return;}
- const name=cleanName(saved?.name||$('recipeName').value)||'Рецепт',root=$('printRecipe');root.className='fold-print';root.style.removeProperty('--prep-card-height');
- const sheet=el('div',undefined,'fold-sheet');sheet.append(printHalf(recipeState,name,date,'batch'),printHalf(recipeState,name,date,'portion'));root.replaceChildren(sheet);
- equalizePreparationCards(root);paginateFoldRecipe();const previous=document.title;document.title=name;window.addEventListener('afterprint',()=>{document.title=previous;removeRecipePageRule();},{once:true});ensureRecipePageRule();window.print();
-}
-function paginateFoldRecipe(){
- const root=$('printRecipe');if(!root.classList.contains('fold-print')||getComputedStyle(root).display==='none')return;
- // A long recipe continues on a second sheet, keeping cutting above and packing below.
- const pages=[...root.querySelectorAll('.fold-sheet')],first=pages[0];if(!first)return;for(const kind of ['batch','portion']){const target=first.querySelector('.print-half-'+kind+' .prep-layout');for(const sheet of pages.slice(1))for(const card of [...sheet.querySelectorAll('.print-half-'+kind+' .prep-item')])target.append(card);}for(const sheet of pages.slice(1))sheet.remove();
- for(const kind of ['batch','portion']){const source=first.querySelector('.print-half-'+kind),cards=[...source.querySelectorAll('.prep-item')];let half=source,pageIndex=0;
-  for(const card of cards){if(!half.contains(card))half.querySelector('.prep-layout').append(card);if(half.scrollHeight>half.clientHeight+1&&half.querySelectorAll('.prep-item').length>1){pageIndex++;let page=root.children[pageIndex];if(!page){page=el('div',undefined,'fold-sheet');for(const original of first.children){const clone=original.cloneNode(true);clone.querySelector('.prep-layout').replaceChildren();const metrics=clone.querySelector('.print-summary');if(metrics)metrics.remove();page.append(clone);}root.append(page);}half=page.querySelector('.print-half-'+kind);half.querySelector('.prep-layout').append(card);}}
- }
-}
-window.addEventListener('beforeprint',paginateFoldRecipe);
 
 let preparationWidth=0;new ResizeObserver(entries=>{const width=entries[0].contentRect.width;if(width!==preparationWidth){preparationWidth=width;requestAnimationFrame(()=>equalizePreparationCards($('cookPlan')));}}).observe($('cookPlan'));
-document.fonts.ready.then(()=>equalizePreparationCards($('cookPlan')));window.addEventListener('beforeprint',()=>equalizePreparationCards($('printRecipe')));
+document.fonts.ready.then(()=>equalizePreparationCards($('cookPlan')));
 
 function preferencePayload(){return {version:25,profile:state.profile||{},microPlan,targetMode:state.targetMode||'manual'};}
 function setProfileStatus(text){$('profileSyncStatus').textContent=text;}
@@ -499,7 +333,7 @@ function queueProfileSave(){profileDirty=true;profileConflict=false;try{localSto
 async function saveProfileCloud(){
  if(!cloudReady||profileSaving||profileConflict||!profileDirty)return;
  profileSaving=true;const snapshot=JSON.stringify(preferencePayload()),owner=profileOwner;
- try{const result=await cloudRequest('/api/preferences',{method:'PUT',body:JSON.stringify({revision:profileRevision,data:JSON.parse(snapshot)})});if(profileOwner!==owner)return;profileRevision=Number(result.revision);if(JSON.stringify(preferencePayload())===snapshot){profileDirty=false;try{localStorage.removeItem('nutrition_preferences_pending_'+(profileOwner??'local'));}catch{}setProfileStatus('Профиль и данные рациона сохранены в аккаунте.');}else profileSaveTimer=setTimeout(saveProfileCloud,100);}
+ try{const result=await cloudRequest('/api/preferences',{method:'PUT',body:JSON.stringify({revision:profileRevision,data:JSON.parse(snapshot)})});if(profileOwner!==owner)return;profileRevision=Number(result.revision);if(JSON.stringify(preferencePayload())===snapshot){profileDirty=false;try{localStorage.removeItem('nutrition_preferences_pending_'+(profileOwner??'local'));}catch{}NutritionDogs.updateName();setProfileStatus('Профиль и данные рациона сохранены в аккаунте.');}else profileSaveTimer=setTimeout(saveProfileCloud,100);}
  catch(e){if(e.status===409){profileConflict=true;$('resolveProfile').hidden=false;setProfileStatus('Профиль изменён на другом устройстве. Ваши правки сохранены локально; выберите «Загрузить профиль аккаунта» в меню.');}else setProfileStatus(e.status===404?'Для сохранения профиля обновите папку api на сервере.':'Профиль сохранён на устройстве. Отправим при восстановлении соединения.');}
  finally{profileSaving=false;}
 }
@@ -510,11 +344,11 @@ async function loadProfileCloud(force=false){
  const data=result.data;if(!data.profile||typeof data.profile!=='object'||!validMicroPlan(data.microPlan))throw Error('Некорректный профиль аккаунта.');
  profileDirty=false;profileConflict=false;$('resolveProfile').hidden=true;state.profile=structuredClone(data.profile);state.targetMode=!data.version||data.targetMode==='profile'?'profile':'manual';microPlan=structuredClone(data.microPlan);
  try{localStorage.removeItem('nutrition_preferences_pending_'+(profileOwner??'local'));localStorage.setItem('nutrition_micro_v1',JSON.stringify(microPlan));}catch{}
- applyProfile();renderMicroInputs();profileTargetUpdate();update();setProfileStatus('Профиль синхронизирован.');if(!data.version)queueProfileSave();
+ applyProfile();renderMicroInputs();profileTargetUpdate();update();NutritionDogs.updateName();setProfileStatus('Профиль синхронизирован.');if(!data.version)queueProfileSave();
 }
 let syncRunning=false,lastSync=0;
 async function autoSync(force=false){
- if(!cloudReady||cloudBusy||syncRunning||document.hidden||!navigator.onLine)return;
+ if(!cloudReady||cloudBusy||syncRunning||NutritionDogs.switching||document.hidden||!navigator.onLine)return;
  if(!force&&Date.now()-lastSync<10000)return;syncRunning=true;lastSync=Date.now();
  try{await refreshCloud();if(profileDirty)await saveProfileCloud();else if(!document.activeElement?.closest('.profile,.micronutrients,.supplement-settings'))await loadProfileCloud();}catch{}finally{syncRunning=false;}
 }
@@ -522,10 +356,10 @@ async function initCloud(){
  if(location.protocol==='file:')return;let session;try{session=await cloudRequest('/api/session');}catch{try{apiMode='php';session=await cloudRequest('/api/session');}catch{$('accountStatus').textContent='На устройстве · сервер не подключён';return;}}
  csrfToken=session.csrf||null;
  if(session.authenticated){
-  const nextOwner=session.userId??session.username??session.email;if(profileOwner!==nextOwner){profileRevision=0;profileOwner=nextOwner;profileConflict=false;try{const pending=JSON.parse(localStorage.getItem('nutrition_preferences_pending_'+profileOwner)||'null');if(pending&&pending.owner===profileOwner&&pending.payload&&validMicroPlan(pending.payload.microPlan)){state.profile=pending.payload.profile;microPlan=pending.payload.microPlan;state.targetMode=pending.payload.targetMode;profileRevision=pending.revision;profileDirty=true;applyProfile();renderMicroInputs();update();}else profileDirty=false;}catch{}}
+  const nextOwner=await NutritionDogs.initialize(session);if(profileOwner!==nextOwner){profileRevision=0;profileOwner=nextOwner;profileConflict=false;try{const pending=JSON.parse(localStorage.getItem('nutrition_preferences_pending_'+profileOwner)||'null');if(pending&&pending.owner===profileOwner&&pending.payload&&validMicroPlan(pending.payload.microPlan)){state.profile=pending.payload.profile;microPlan=pending.payload.microPlan;state.targetMode=pending.payload.targetMode;profileRevision=pending.revision;profileDirty=true;applyProfile();renderMicroInputs();update();}else profileDirty=false;}catch{}}
   cloudReady=true;$('accountStatus').textContent=session.email||session.username||'Мои рецепты';$('accountMenu').hidden=false;$('refreshCloud').hidden=false;$('passwordSignIn').hidden=true;$('signOut').hidden=session.authMode!=='password';$('changePassword').hidden=session.authMode!=='password';$('manageEmail').hidden=session.authMode!=='password';$('manageEmail').textContent=session.emailVerified?'Почта':'Подтвердить почту';await refreshCloud();
   try{if(profileDirty)await saveProfileCloud();else await loadProfileCloud();}catch(e){setProfileStatus(e.status===404?'Обновите папку api для синхронизации профиля.':'Профиль пока на устройстве.');}
- }else{cloudReady=false;profileOwner=null;profileRevision=0;profileDirty=false;$('manageEmail').hidden=true;$('changePassword').hidden=true;$('signOut').hidden=true;$('refreshCloud').hidden=true;$('accountMenu').hidden=true;if(session.authMode==='password')$('passwordSignIn').hidden=false;else if(session.signInPath){$('signIn').href=session.signInPath;$('signIn').hidden=false;}$('accountStatus').textContent='Войдите для синхронизации';}
+ }else{NutritionDogs.reset();cloudReady=false;profileOwner=null;profileRevision=0;profileDirty=false;$('manageEmail').hidden=true;$('changePassword').hidden=true;$('signOut').hidden=true;$('refreshCloud').hidden=true;$('accountMenu').hidden=true;if(session.authMode==='password')$('passwordSignIn').hidden=false;else if(session.signInPath){$('signIn').href=session.signInPath;$('signIn').hidden=false;}$('accountStatus').textContent='Войдите для синхронизации';}
 }
 $('resolveProfile').onclick=async()=>{try{await loadProfileCloud(true);$('accountMenu').open=false;}catch{setProfileStatus('Не удалось загрузить профиль. Правки остались на устройстве.');}};
 window.addEventListener('focus',()=>autoSync());document.addEventListener('visibilitychange',()=>{if(!document.hidden)autoSync();});window.addEventListener('online',()=>autoSync(true));setInterval(()=>autoSync(),60000);

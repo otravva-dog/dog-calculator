@@ -1,0 +1,11 @@
+{
+  "name": "gavstronomiya-calculator",
+  "private": true,
+  "version": "32.0.0",
+  "scripts": {
+    "test": "node tests/calculator-core.test.cjs",
+    "test:browser": "node tests/browser.cjs",
+    "build": "python3 tools/build.py"
+  },
+  "devDependencies": { "playwright": "1.62.1" }
+}
